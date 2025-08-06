@@ -15,4 +15,13 @@ authRoutes.post('/login', (req, res) => {
     }
 });
 
+authRoutes.post('/register', (req, res) => {
+
+});
+
+//?
+authRoutes.post('/logout', (req, res) => {
+
+});
+
 export default authRoutes;
