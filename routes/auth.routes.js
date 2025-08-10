@@ -1,27 +1,10 @@
 import { Router } from "express";
+import { register, login, logout } from '../controllers/auth.controllers.js';
 
 const authRoutes = Router();
 
-authRoutes.post('/login', (req, res) => {
-    const { email, password } = req.body;
-
-    if (!email || !password) {
-        return res.status(401).send({ error: 'Email and Password are required' });
-    }
-    if(email === 'admin@gmail.com' && password === 'password1234') {
-        res.status(200).send({ message: 'login successfully' });
-    } else {
-        res.status(403).send({message: 'Invalid email or password'});
-    }
-});
-
-authRoutes.post('/register', (req, res) => {
-
-});
-
-//?
-authRoutes.post('/logout', (req, res) => {
-
-});
+authRoutes.post('/login', login);
+authRoutes.post('/register', register);
+authRoutes.post('/logout', logout);
 
 export default authRoutes;
