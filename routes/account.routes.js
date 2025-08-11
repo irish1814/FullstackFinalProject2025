@@ -1,8 +1,20 @@
-import { Router } from "express";
-import { getAccountByUserId } from "../controllers/account.controllers.js";
+import { Router } from 'express';
+import { authenticateJWT } from '../middleware/authenticate.middleware.js';
+import {getAccount, getAccounts} from '../controllers/account.controller.js';
+import {errorMiddleware} from "../middleware/errorHandling.middleware.js";
 
 const accountRoutes = Router();
+accountRoutes.use(errorMiddleware);
 
-accountRoutes.get('/:userId', getAccountByUserId);
+// ✅ Protected
+accountRoutes.get('/', authenticateJWT, getAccounts);
+
+// ✅ Protected
+accountRoutes.get('/:id', authenticateJWT, getAccount);
+
+// ❌ Public
+accountRoutes.get('/bank-info', (req, res) => {
+    res.json({ branch: 'Downtown', hours: '9am-5pm' });
+});
 
 export default accountRoutes;

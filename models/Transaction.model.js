@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 
 const transactionSchema = new mongoose.Schema({
-  accountId: { type: mongoose.Schema.Types.ObjectId, ref: 'Account', required: true },
+  accountId: { type: mongoose.Schema.Types.ObjectId, ref: 'AccountModel', required: true },
   type: {
     type: String,
     enum: ['deposit', 'withdrawal', 'transfer', 'loan', 'currencyExchange', 'saving'],
@@ -12,5 +12,5 @@ const transactionSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now }
 });
 
-const Transaction = mongoose.model('Transaction', transactionSchema);
-export default Transaction;
+const TransactionModel = mongoose.model('TransactionModel', transactionSchema);
+export default TransactionModel;
