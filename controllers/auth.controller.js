@@ -84,7 +84,7 @@ export const login = async (req, res, next) => {
         // Generate JWT token
         const token = generateToken({ userId: user._id });
 
-        const account = await AccountModel.findById(user._id);
+        const account = await AccountModel.findOne({ userId: user._id });
         // Respond with success
         res.status(200).json({
             message: 'User signed in successfully',
