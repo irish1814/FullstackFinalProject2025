@@ -1,6 +1,17 @@
 import { config } from 'dotenv';
 
-config( { path: `.env.${process.env.NODE_ENV || 'development'}.local` , quiet: true } );
+const env = process.env.NODE_ENV || 'development';
+const path = `.env.${env}.local`; 
 
-export const { PORT, NODE_ENV, DB_URL, JWT_SECRET } = process.env;
+config({ path, override: true }); 
 
+export const {
+  PORT = '3000',
+  NODE_ENV = env,
+  DB_URL,
+  JWT_SECRET
+} = process.env;
+
+if (!DB_URL) {
+  throw new Error(`DB_URL is missing. Tried to load: ${path}`);
+}

@@ -1,9 +1,11 @@
 import express from 'express';
-import { invalidJsonFormat, errorMiddleware }  from './middleware/errorHandling.middleware.js'
-import connectToDatabase from './database/mongodb.js';
-import authRoutes from './routes/auth.routes.js';
-import accountRoutes from "./routes/account.routes.js";
-import { PORT } from "./config/env.js";
+import { invalidJsonFormat, errorMiddleware }  from './server/middleware/errorHandling.middleware.js'
+import connectToDatabase from './server/database/mongodb.js';
+import authRoutes from './server/routes/auth.routes.js';
+import accountRoutes from "./server/routes/account.routes.js";
+import { PORT } from "./server/config/env.js";
+import 'dotenv/config';
+
 
 const app = express();
 
