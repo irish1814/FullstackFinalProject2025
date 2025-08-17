@@ -1,8 +1,32 @@
 import mongoose from 'mongoose';
 import crypto from 'crypto';
 import { maskAccountNumber } from '../utils/formatter.util.js';
-import SavingsModel  from './Saving.model.js';
-import LoanModel from './Loan.model.js';
+
+
+// Subdocument schema for multiple savings plans
+const savingsSchema = new mongoose.Schema({
+    name: { type: String, required: true },            // e.g., "Vacation Fund"
+    targetAmount: { type: Number, default: 0 },
+    balance: { type: Number, default: 0 },
+    interestRate: { type: Number, default: 0.02 },    // yearly %
+    startDate: { type: Date, default: Date.now },
+    maturityDate: { type: Date },
+    isLocked: { type: Boolean, default: false },
+    status: { type: String, enum: ['active', 'closed'], default: 'active' }
+}, { _id: true });
+
+// Subdocument schema for multiple loans
+const loanSchema = new mongoose.Schema({
+    name: { type: String, required: true },            // e.g., "Car Loan"
+    principal: { type: Number, required: true },
+    remainingBalance: { type: Number, required: true },
+    interestRate: { type: Number, default: 0 },
+    monthlyPayment: { type: Number },
+    termMonths: { type: Number },
+    startDate: { type: Date, default: Date.now },
+    dueDate: { type: Date },
+    status: { type: String, enum: ['ongoing', 'paid', 'defaulted'], default: 'ongoing' }
+}, { _id: true });
 
 const accountSchema = new mongoose.Schema({
     userId: {
@@ -48,9 +72,9 @@ const accountSchema = new mongoose.Schema({
         default: '0001'
     },
 
-    savingsPlans: [SavingsModel],
+    savingsPlans: [savingsSchema],
 
-    loans: [LoanModel],
+    loans: [loanSchema],
 
     subBalances: {
         type: Map,
