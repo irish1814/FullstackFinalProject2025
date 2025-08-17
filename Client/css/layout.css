@@ -1,0 +1,44 @@
+.app-shell {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  min-height: 100%;
+}
+
+.sidebar {
+  position: sticky; top: 0; align-self: start;
+  height: 100vh;
+  padding: 28px 18px;
+  backdrop-filter: blur(var(--glass-blur));
+  background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03));
+  border-right: 1px solid rgba(255,255,255,0.08);
+}
+
+.brand {
+  display: flex; align-items: center; gap: 12px; margin-bottom: 26px;
+  font-weight: 800; letter-spacing: 0.5px;
+}
+.brand__dot {
+  width: 14px; height: 14px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary), var(--info));
+  box-shadow: 0 0 18px rgba(45,225,194,0.6);
+}
+
+.nav {
+  display: grid; gap: 8px;
+}
+.nav a {
+  display: block; padding: 12px 14px; border-radius: 12px; color: var(--text);
+  background: transparent; border: 1px solid transparent;
+}
+.nav a:hover { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.08); }
+.nav a.active { background: rgba(45,225,194,0.12); border-color: rgba(45,225,194,0.28); }
+
+.content {
+  padding: 28px clamp(16px, 4vw, 48px);
+}
+
+.container {
+  max-width: 1180px; margin: 0 auto;
+  display: grid; gap: var(--gap-lg);
+  animation: fadeUp 320ms ease-out;
+}

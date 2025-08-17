@@ -1,0 +1,37 @@
+:root {
+  /* צבעי יסוד */
+  --bg: #0c0f14;               /* רקע כללי */
+  --surface: rgba(255,255,255,0.06);
+  --surface-strong: rgba(255,255,255,0.10);
+  --text: #e8eef6;
+  --muted: #a7b1c2;
+
+  /* אקשנט בנקאי – ירקרק טורקיז */
+  --primary: #2de1c2;
+  --primary-700: #1db3a0;
+  --primary-900: #128176;
+
+  /* danger/success/info */
+  --success: #25d366;
+  --danger: #ff5d73;
+  --warning: #ffcc66;
+  --info: #7ab8ff;
+
+  /* טיפוגרפיה ומרווחים */
+  --radius: 18px;
+  --radius-sm: 12px;
+  --radius-lg: 28px;
+  --gap: 16px;
+  --gap-lg: 24px;
+  --gap-xl: 40px;
+
+  /* צללים וזכוכית */
+  --shadow-1: 0 8px 24px rgba(0,0,0,0.25);
+  --shadow-2: 0 12px 36px rgba(0,0,0,0.35);
+  --glass-blur: 16px;
+
+  /* גרדיאנט רקע “אורורה” */
+  --aurora: radial-gradient(1200px 800px at 80% 10%, rgba(45,225,194,0.18), transparent 40%),
+            radial-gradient(900px 700px at 10% 20%, rgba(122,184,255,0.16), transparent 50%),
+            radial-gradient(1000px 700px at 40% 110%, rgba(255,93,115,0.12), transparent 45%);
+}

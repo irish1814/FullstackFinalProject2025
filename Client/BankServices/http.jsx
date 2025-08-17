@@ -1,21 +1,25 @@
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+const API_URL = import.meta.env.VITE_API_URL || "/api";
 
-export async function http(path, { method = 'GET', data, token } = {}) {
+export async function http(path, { method = "GET", data, token, headers } = {}) {
   const res = await fetch(`${API_URL}${path}`, {
     method,
     headers: {
-      'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {})
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...(headers || {}),
     },
-    body: data ? JSON.stringify(data) : undefined
+    body: data !== undefined ? JSON.stringify(data) : undefined,
   });
 
-  let payload = null;
-  try { payload = await res.json(); } catch (_) {}
+  let body = null;
+  try { body = await res.json(); } catch (_) {}
 
   if (!res.ok) {
-    const msg = (payload && (payload.message || payload.error)) || `Request failed: ${res.status}`;
+    const msg = body?.message || `${res.status} ${res.statusText}`;
     throw new Error(msg);
   }
-  return payload;
+
+  return body?.data ?? body;
 }
+
+export { API_URL };

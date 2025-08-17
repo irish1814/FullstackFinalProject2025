@@ -1,0 +1,21 @@
+.kpis {
+  display: grid;
+  grid-template-columns: repeat( auto-fit, minmax(220px, 1fr) );
+  gap: var(--gap);
+}
+.kpi {
+  padding: 18px; border-radius: var(--radius);
+  background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.04));
+  border: 1px solid rgba(255,255,255,0.10);
+  box-shadow: var(--shadow-1);
+}
+.kpi__label { color: var(--muted); font-size: 13px; }
+.kpi__value { font-size: 28px; font-weight: 800; }
+
+.grid-panels {
+  display: grid; gap: var(--gap);
+  grid-template-columns: 1.2fr 1fr;
+}
+@media (max-width: 980px) {
+  .grid-panels { grid-template-columns: 1fr; }
+}

@@ -1,9 +1,9 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 export default function Signup() {
   const nav = useNavigate();
-  const [form, setForm] = useState({ username: "", password: "", confirm: "" });
+  const [form, setForm] = useState({ email: "", password: "", confirm: "" });
   const [err, setErr] = useState("");
 
   function onChange(e) {
@@ -14,8 +14,8 @@ export default function Signup() {
     e.preventDefault();
     setErr("");
 
-    if (!form.username || !form.password || !form.confirm) {
-      setErr("נא למלא את כל השדות");
+    if (!form.email || !form.password || !form.confirm) {
+      setErr("נא למלא אימייל, סיסמה ואימות סיסמה");
       return;
     }
     if (form.password !== form.confirm) {
@@ -27,10 +27,7 @@ export default function Signup() {
       return;
     }
 
-    localStorage.setItem("signup-username", form.username);
-    localStorage.setItem("signup-password", form.password);
-
-    nav("/signup/profileDetails");
+    nav("/signup/profileDetails", { state: { email: form.email, password: form.password } });
   }
 
   return (
@@ -38,8 +35,8 @@ export default function Signup() {
       <h1>הרשמה</h1>
 
       <label>
-        שם משתמש:
-        <input name="username" value={form.username} onChange={onChange} />
+        אימייל:
+        <input name="email" type="email" value={form.email} onChange={onChange} />
       </label>
 
       <label>

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { AccountsService } from "../BankServices/accounts.service.jsx";
-import { TransactionsService } from "../BankServices/transactions.service.jsx";
+import { AccountsService } from "./service/accounts.service"
+import { TransactionsService } from "./service/transactions.service.jsx";
+import '../css/index.css';
 
 export default function Transfers() {
   const [accounts, setAccounts] = useState([]);
@@ -28,7 +29,6 @@ export default function Transfers() {
     }
 
     try {
-      // כרגע: דמו לוקאלי. כשיהיה שרת: נחליף ל TransactionsService.transfer אמיתי (POST).
       await TransactionsService.transfer({
         fromAccountId: fromId,
         toAccountNumber,
@@ -47,14 +47,15 @@ export default function Transfers() {
   if (!accounts.length) return <div>Loading accounts...</div>;
 
   return (
-    <div>
+  <div className="content">
+    <div className="container">
       <h1>Transfers</h1>
 
-      <form onSubmit={onSubmit}>
-        <div>
-          <label>From account:</label>
-          <select value={fromId} onChange={(e) => setFromId(e.target.value)}>
-            {accounts.map(a => (
+      <form className="form form--card mt-2" onSubmit={onSubmit}>
+        <div className="form__row">
+          <label className="form__label">From account</label>
+          <select className="select" value={fromId} onChange={(e) => setFromId(e.target.value)}>
+            {accounts.map((a) => (
               <option key={a.id || a._id} value={a.id || a._id}>
                 {a.accountNumber}
               </option>
@@ -62,25 +63,30 @@ export default function Transfers() {
           </select>
         </div>
 
-        <div>
-          <label>To account number:</label>
-          <input value={toAccountNumber} onChange={(e) => setToAccountNumber(e.target.value)} />
+        <div className="form__row">
+          <label className="form__label">To account number</label>
+          <input className="input" value={toAccountNumber} onChange={(e) => setToAccountNumber(e.target.value)} />
         </div>
 
-        <div>
-          <label>Amount:</label>
-          <input type="number" value={amount} onChange={(e) => setAmount(e.target.value)} />
+        <div className="form__row">
+          <label className="form__label">Amount</label>
+          <input className="input" type="number" value={amount} onChange={(e) => setAmount(e.target.value)} />
         </div>
 
-        <div>
-          <label>Note:</label>
-          <input value={note} onChange={(e) => setNote(e.target.value)} />
+        <div className="form__row">
+          <label className="form__label">Note</label>
+          <input className="input" value={note} onChange={(e) => setNote(e.target.value)} />
         </div>
 
-        <button type="submit">Send</button>
+        <div className="form__actions">
+          <button className="btn" type="button">Cancel</button>
+          <button className="btn btn--primary" type="submit">Send</button>
+        </div>
+
+        {status && <p className="form__hint mt-1">{status}</p>}
       </form>
-
-      {status && <p>{status}</p>}
     </div>
-  );
+  </div>
+);
+
 }

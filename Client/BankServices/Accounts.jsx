@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { AccountsService } from "../BankServices/accounts.service.jsx";
+import { AccountsService } from "./service/accounts.service.jsx";
+import '../css/index.css';
 
 export default function Accounts() {
   const [accounts, setAccounts] = useState([]);
@@ -22,23 +23,33 @@ export default function Accounts() {
   if (loading) return <div>Loading accounts...</div>;
   if (err) return <div>Error: {err}</div>;
 
-  return (
-    <div>
+ return (
+  <div className="content">
+    <div className="container">
       <h1>Accounts</h1>
+
       {accounts.length === 0 ? (
-        <p>No accounts found.</p>
+        <div className="card mt-2">No accounts found.</div>
       ) : (
-        <ul>
+        <div className="grid cols-2 gap-2 mt-2">
           {accounts.map((acc) => (
-            <li key={acc._id || acc.id}>
-              <p>Account Number: {acc.accountNumber}</p>
-              <p>Balance: {acc.balance} {acc.currency}</p>
-              <p>Type: {acc.accountType}</p>
-              <p>Status: {acc.status}</p>
-            </li>
+            <div className="card" key={acc._id || acc.id}>
+              <div className="flex justify-between items-center">
+                <h3>#{acc.accountNumber}</h3>
+                <span className="badge">{acc.accountType}</span>
+              </div>
+              <div className="mt-2">
+                <strong>Balance:</strong> {acc.balance} {acc.currency}
+              </div>
+              <div className="mt-1">
+                <strong>Status:</strong>{' '}
+                <span className="badge badge--ok">{acc.status}</span>
+              </div>
+            </div>
           ))}
-        </ul>
+        </div>
       )}
     </div>
-  );
+  </div>
+);
 }

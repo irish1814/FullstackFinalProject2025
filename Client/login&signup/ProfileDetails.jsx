@@ -1,68 +1,134 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+// ✔ נתיב נכון
+import { AuthService } from "../BankServices/service/auth.service.jsx";
 
 export default function ProfileDetails() {
   const nav = useNavigate();
-  const [form, setForm] = useState({ age: "", gender: "", region: "" });
+  const { state } = useLocation();
   const [err, setErr] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  function Change(e) {
+  const [form, setForm] = useState({
+    firstName: "",
+    lastName: "",
+    gender: "",
+    age: "",
+    street: "",
+    country: ""
+  });
+
+  useEffect(() => {
+    if (!state?.email || !state?.password) {
+      nav("/signup", { replace: true });
+    }
+  }, [state, nav]);
+
+  function onChange(e) {
     setForm({ ...form, [e.target.name]: e.target.value });
   }
 
-  function Submit(e) {
+  async function onSubmit(e) {
     e.preventDefault();
     setErr("");
 
     const ageNum = Number(form.age);
-    if (!form.age || !form.gender || !form.region) {
-      setErr("נא למלא את כל השדות");
-      return;
-    }
-    if (!Number.isFinite(ageNum) || ageNum < 16) {
-      setErr("גיל חייב להיות 16 ומעלה");
+    if (!form.firstName || !form.lastName || !form.gender || !form.street || !form.country || !ageNum) {
+      setErr("נא למלא את כל שדות הפרופיל");
       return;
     }
 
-    const username = localStorage.getItem("signup-username") || "";
-    const password = localStorage.getItem("signup-password") || "";
-    const profile = { username, age: ageNum, gender: form.gender, region: form.region };
+    try {
+      setLoading(true);
 
-    localStorage.setItem("profile", JSON.stringify(profile));
+      const payload = {
+        name: `${form.firstName} ${form.lastName}`.replace(/\s+/g, " ").trim(),
+        email: String(state.email || "").trim(),
+        password: state.password
+      };
 
-    localStorage.removeItem("signup-username");
-    localStorage.removeItem("signup-password");
+      await AuthService.signup(payload);
 
-    nav("/login");
+      nav("/login", { replace: true });
+    } catch (e2) {
+      setErr(e2.message || "שגיאה בהרשמה");
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
-    <form Submit={Submit}>
+    <form onSubmit={onSubmit}>
       <h1>פרטי פרופיל</h1>
 
+      <p>אימייל: <b>{state?.email}</b></p>
+
       <label>
-        גיל:
-        <input name="age" value={form.age} Change={Change} />
+        שם פרטי:
+        <input
+          name="firstName"
+          value={form.firstName}
+          onChange={onChange}
+          placeholder="e.g. David"
+        />
+      </label>
+
+      <label>
+        שם משפחה:
+        <input
+          name="lastName"
+          value={form.lastName}
+          onChange={onChange}
+          placeholder="e.g. Levi"
+        />
       </label>
 
       <label>
         מגדר:
-        <select name="gender" value={form.gender} Change={Change}>
+        <select name="gender" value={form.gender} onChange={onChange}>
           <option value="">בחר...</option>
-          <option value="Male">זכר</option>
-          <option value="Female">נקבה</option>
-          <option value="Other">אחר</option>
+          <option value="male">זכר</option>
+          <option value="female">נקבה</option>
+          <option value="other">אחר</option>
         </select>
       </label>
 
       <label>
-        אזור מגורים:
-        <input name="region" value={form.region} Change={Change} />
+        גיל:
+        <input
+          name="age"
+          type="number"
+          value={form.age}
+          onChange={onChange}
+          placeholder="18"
+        />
+      </label>
+
+      <label>
+        רחוב:
+        <input
+          name="street"
+          value={form.street}
+          onChange={onChange}
+          placeholder="Herzl 10"
+        />
+      </label>
+
+      <label>
+        מדינה:
+        <input
+          name="country"
+          value={form.country}
+          onChange={onChange}
+          placeholder="Israel"
+        />
       </label>
 
       {err && <div>{err}</div>}
 
-      <button type="submit">סיום והרשמה</button>
+      <button type="submit" disabled={loading}>
+        {loading ? "שולח..." : "סיום הרשמה"}
+      </button>
     </form>
   );
 }

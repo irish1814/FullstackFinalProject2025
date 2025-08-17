@@ -1,4 +1,4 @@
-import { http } from './http.jsx';
+import { http } from '../http.jsx';
 
 export const AccountsService = {
   async getAccounts() {

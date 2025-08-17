@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { AccountsService } from "../BankServices/accounts.service.jsx";
-import { TransactionsService } from "../BankServices/transactions.service.jsx";
+import { AccountsService } from "./service/accounts.service";
+import { TransactionsService } from "./service/transactions.service.jsx";
+import '../css/index.css';
 
 export default function Transactions() {
   const [account, setAccount] = useState(null);
@@ -34,27 +35,46 @@ export default function Transactions() {
   if (!account) return <div>No account found.</div>;
 
   return (
-    <div>
-      <h1>Transactions</h1>
-
-      <div>
-        <label>Filter:</label>
-        <select value={type} onChange={(e) => setType(e.target.value)}>
-          <option value="all">All</option>
-          <option value="deposit">deposit</option>
-          <option value="withdraw">withdraw</option>
-          <option value="transfer">transfer</option>
-          <option value="loan_repayment">loan_repayment</option>
-        </select>
+  <div className="content">
+    <div className="container">
+      <div className="toolbar">
+        <h1>Transactions</h1>
+        <div className="flex gap-2 items-center">
+          <label className="form__label">Filter</label>
+          <select className="select" value={type} onChange={(e) => setType(e.target.value)}>
+            <option value="all">All</option>
+            <option value="deposit">deposit</option>
+            <option value="withdraw">withdraw</option>
+            <option value="transfer">transfer</option>
+            <option value="loan_repayment">loan_repayment</option>
+          </select>
+        </div>
       </div>
 
-      <ul>
-        {filtered.map(tx => (
-          <li key={tx.id}>
-            <span>{tx.date} – {tx.type} – {tx.amount} – {tx.note}</span>
-          </li>
-        ))}
-      </ul>
+      <div className="card mt-2">
+        <table className="table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Type</th>
+              <th>Amount</th>
+              <th>Note</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filtered.map((tx) => (
+              <tr key={tx.id}>
+                <td>{tx.date}</td>
+                <td>{tx.type}</td>
+                <td>{tx.amount}</td>
+                <td>{tx.note}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
-  );
+  </div>
+);
+
 }
