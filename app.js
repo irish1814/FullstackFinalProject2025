@@ -5,6 +5,7 @@ import connectToDatabase from './server/database/mongodb.js';
 import authRoutes from './server/routes/auth.routes.js';
 import accountRoutes from "./server/routes/account.routes.js";
 import transactionRoutes from "./server/routes/transaction.routes.js";
+import exchangeRoutes from "./server/routes/currencyExchange.routes.js";
 import { PORT } from "./server/config/env.js";
 import 'dotenv/config';
 
@@ -29,6 +30,7 @@ app.options('*', cors());
 app.use('/api/auth', authRoutes);
 app.use('/api/accounts', accountRoutes);
 app.use('/api/transactions', transactionRoutes);
+app.use('/api/exchanges', exchangeRoutes);
 
 app.use(errorMiddleware);
 
