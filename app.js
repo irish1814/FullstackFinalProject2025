@@ -3,6 +3,7 @@ import { invalidJsonFormat, errorMiddleware }  from './server/middleware/errorHa
 import connectToDatabase from './server/database/mongodb.js';
 import authRoutes from './server/routes/auth.routes.js';
 import accountRoutes from "./server/routes/account.routes.js";
+import transactionRoutes from "./server/routes/transaction.routes.js";
 import { PORT } from "./server/config/env.js";
 import 'dotenv/config';
 
@@ -14,6 +15,7 @@ app.use(invalidJsonFormat);
 
 app.use('/api/auth', authRoutes);
 app.use('/api/accounts', accountRoutes);
+app.use('/api/transactions', transactionRoutes);
 
 app.use(errorMiddleware);
 

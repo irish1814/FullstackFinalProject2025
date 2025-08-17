@@ -1,6 +1,8 @@
 import mongoose from 'mongoose';
 import crypto from 'crypto';
 import { maskAccountNumber } from '../utils/formatter.util.js';
+import SavingsModel  from './Saving.model.js';
+import LoanModel from './Loan.model.js';
 
 const accountSchema = new mongoose.Schema({
     userId: {
@@ -44,16 +46,24 @@ const accountSchema = new mongoose.Schema({
     branchCode: {
         type: String,
         default: '0001'
+    },
+
+    savingsPlans: [SavingsModel],
+
+    loans: [LoanModel],
+
+    subBalances: {
+        type: Map,
+        of: Number,
+        default: {}
     }
 
 }, { timestamps: true });
 
-// Auto-generate unique account number
+// Auto-generate unique 12-digit account number
 accountSchema.pre('validate', function (next) {
     if (!this.accountNumber) {
-        // Generate 12-digit numeric account number
-        const randomNum = crypto.randomInt(100000000000, 999999999999).toString();
-        this.accountNumber = randomNum;
+        this.accountNumber = crypto.randomInt(100000000000, 999999999999).toString();
     }
     next();
 });
