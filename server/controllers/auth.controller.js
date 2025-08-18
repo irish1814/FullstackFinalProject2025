@@ -154,12 +154,22 @@ export const loginWithMFA = async (req, res, next) => {
                 error.statusCode = 401;
                 throw error;
             }
+
+            // TOTP verified → generate JWT and find matching account
+            const jwtToken = generateToken({ userId: user._id });
+            const account = await AccountModel.findOne({ userId: user._id });
+
+            res.status(200).json({ success: true,
+                message: 'User signed in successfully',
+                data: { jwtToken, user, account }
+            });
         }
     } catch (error) {
         next(error);
     }
 
 }
+
 export const GenerateMFA = async (req, res, next) => {
     try {
         const { id, disable } = req.body;
