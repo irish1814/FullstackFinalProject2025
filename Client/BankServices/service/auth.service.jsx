@@ -1,18 +1,42 @@
-import { http } from "../http.jsx";
+import { http } from "../http";
 
 export const AuthService = {
-  login: async (email, password) => {
-    const res = await http("/auth/login", { method: "POST", data: { email, password } });
-    if (res?.token) localStorage.setItem("token", res.token);
-    if (res?.user?.email) localStorage.setItem("email", res.user.email);
-    return res;
+  login(email, password) {
+    return http("/auth/login", { method: "POST", data: { email, password } })
+      .then(res => res?.data);   
   },
 
-  me: async () => {
-    return await http("/auth/me"); 
+  verify2fa(code, userId) {
+    return http("/auth/loginWithMFA", {
+      method: "POST",
+      data: { id: userId, twoFactorToken: code },
+    }).then((res) => {
+      const token = res?.jwtToken || res?.token;
+      return { token, user: res?.user, account: res?.account };
+    });
   },
 
-  signup: async (payload) => {
-    return await http("/auth/signup", { method: "POST", data: payload });
+  me(token) {
+    return http("/auth/me", { token });
+  },
+
+  signup(payload) {
+    return http("/auth/register", { method: "POST", data: payload });
+  },
+
+  adminGate(entryCode) {
+    return http("/auth/admin-gate", { method: "POST", data: { entryCode } });
+  },
+
+  toggle2FA(userId) {
+    return http("/auth/toggle-2fa", {
+      method: "POST",
+      data: { userId }
+    }).then(res => res?.data);
+  },
+
+  getProfile() {
+    return http("/auth/me", { method: "GET" })
+      .then(res => res?.data);
   },
 };
