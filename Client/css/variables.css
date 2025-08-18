@@ -35,3 +35,65 @@
             radial-gradient(900px 700px at 10% 20%, rgba(122,184,255,0.16), transparent 50%),
             radial-gradient(1000px 700px at 40% 110%, rgba(255,93,115,0.12), transparent 45%);
 }
+/* ===== Breakpoints ===== */
+:root{
+  --bp-sm: 480px;
+  --bp-md: 768px;
+  --bp-lg: 1024px;
+  --bp-xl: 1280px;
+}
+/* כפתור המבורגר */
+.topbar__toggle{
+  display: none;           /* מוצג רק במובייל */
+  width: 40px; height: 40px;
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 12px;
+  background: rgba(255,255,255,0.06);
+  cursor: pointer;
+  display: inline-grid; place-items: center;
+}
+.burger{
+  width: 22px; height: 2px; background: var(--text);
+  position: relative;
+}
+.burger::before, .burger::after{
+  content: ""; position: absolute; left: 0;
+  width: 22px; height: 2px; background: var(--text);
+}
+.burger::before{ top: -7px; }
+.burger::after{ top: 7px; }
+
+/* Drawer למובייל – מתחת ל־topbar */
+.drawer{
+  position: fixed;
+  top: 56px;               /* גובה מקורב של ה־topbar; אם צריך, תעדכן */
+  left: 0; right: 0;
+  background: rgba(12,15,20,0.98);
+  border-top: 1px solid rgba(255,255,255,0.10);
+  padding: 12px;
+  display: grid; gap: 8px;
+  transform: translateY(-8px);
+  opacity: 0; pointer-events: none;
+  transition: transform .2s ease, opacity .2s ease;
+  z-index: 49;
+}
+.drawer a{
+  color: var(--text);
+  padding: 12px; border-radius: 12px;
+  border: 1px solid transparent;
+  text-decoration: none;
+}
+.drawer a:hover{ background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.08); }
+
+.drawer--open{
+  transform: translateY(0);
+  opacity: 1; pointer-events: auto;
+}
+
+@media (max-width: 768px){
+  .topbar__nav { display: none; }
+  .topbar__toggle { display: inline-grid; }
+}
+@media (min-width: 769px){
+  .drawer { display: none; }
+}

@@ -25,8 +25,13 @@ export default function Login() {
       setLoading(true);
       const { token, user } = await AuthService.login(form.email, form.password);
       localStorage.setItem("token", token);
+
       if (user?.email) localStorage.setItem("email", user.email);
+
+      if (user?.role) localStorage.setItem("role", user.role);
+
       nav("/dashboard");
+
     } catch (e2) {
       setErr(e2?.message || "שגיאת התחברות");
     } finally {

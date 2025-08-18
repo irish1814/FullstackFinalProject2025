@@ -97,3 +97,152 @@
 .auth-subtitle { color: var(--muted); margin-bottom: 16px; }
 .auth-actions { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-top: 10px; }
 .form__error { color: var(--danger); font-size: 13px; margin-top: 6px; }
+
+/* ===== Two-Column Page ===== */
+.page-grid{
+  display: grid;
+  gap: 16px;
+}
+@media (min-width: 768px){
+  .page-grid{
+    grid-template-columns: 1fr 1fr; /* שני טורים בדסקטופ */
+    align-items: start;
+  }
+}
+
+.card{
+  background: #14182b;
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 16px;
+  padding: 16px;
+}
+.card h2{ margin-top: 0; font-size: 1.1rem; }
+
+/* במסכים צרים – מסתירים את הניווט */
+@media (max-width: 768px) {
+  .topbar__nav { display: none; }
+  .topbar__toggle { display: inline-flex; }
+}
+
+/* במסכים גדולים – מסתירים את ההמבורגר */
+@media (min-width: 769px) {
+  .topbar__toggle { display: none; }
+}
+/* כפתור המבורגר */
+.topbar__toggle{
+  display: none;           /* מוצג רק במובייל */
+  width: 40px; height: 40px;
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 12px;
+  background: rgba(255,255,255,0.06);
+  cursor: pointer;
+  display: inline-grid; place-items: center;
+}
+.burger{
+  width: 22px; height: 2px; background: var(--text);
+  position: relative;
+}
+.burger::before, .burger::after{
+  content: ""; position: absolute; left: 0;
+  width: 22px; height: 2px; background: var(--text);
+}
+.burger::before{ top: -7px; }
+.burger::after{ top: 7px; }
+
+/* Drawer למובייל – מתחת ל־topbar */
+.drawer{
+  position: fixed;
+  top: 56px;               /* גובה מקורב של ה־topbar; אם צריך, תעדכן */
+  left: 0; right: 0;
+  background: rgba(12,15,20,0.98);
+  border-top: 1px solid rgba(255,255,255,0.10);
+  padding: 12px;
+  display: grid; gap: 8px;
+  transform: translateY(-8px);
+  opacity: 0; pointer-events: none;
+  transition: transform .2s ease, opacity .2s ease;
+  z-index: 49;
+}
+.drawer a{
+  color: var(--text);
+  padding: 12px; border-radius: 12px;
+  border: 1px solid transparent;
+  text-decoration: none;
+}
+.drawer a:hover{ background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.08); }
+
+.drawer--open{
+  transform: translateY(0);
+  opacity: 1; pointer-events: auto;
+}
+
+@media (max-width: 768px){
+  .topbar__nav { display: none; }
+  .topbar__toggle { display: inline-grid; }
+}
+@media (min-width: 769px){
+  .drawer { display: none; }
+}
+.topbar__nav a{
+  position: relative;
+  transition: background var(--speed), border-color var(--speed);
+}
+.topbar__nav a.active::after{
+  content:""; position:absolute; left:12px; right:12px; bottom:4px; height:2px;
+  background: var(--smart-gradient); border-radius: 2px;
+  filter: saturate(120%) blur(.2px);
+}
+
+.topbar__brand{ filter: var(--pulse); }
+
+/* כפתור המבורגר */
+.topbar__toggle{
+  display: none;
+  width: 40px; height: 40px;
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 12px;
+  background: rgba(255,255,255,0.06);
+  cursor: pointer;
+  display: inline-grid; place-items: center;
+}
+.burger{
+  width: 22px; height: 2px; background: var(--text);
+  position: relative;
+}
+.burger::before, .burger::after{
+  content: ""; position: absolute; left: 0;
+  width: 22px; height: 2px; background: var(--text);
+}
+.burger::before{ top: -7px; }
+.burger::after{ top: 7px; }
+
+/* Drawer למובייל */
+.drawer{
+  position: fixed;
+  top: 56px; left: 0; right: 0;
+  background: rgba(12,15,20,0.98);
+  border-top: 1px solid rgba(255,255,255,0.10);
+  padding: 12px;
+  display: grid; gap: 8px;
+  transform: translateY(-8px);
+  opacity: 0; pointer-events: none;
+  transition: transform .2s ease, opacity .2s ease;
+  z-index: 49;
+}
+.drawer a{
+  color: var(--text);
+  padding: 12px; border-radius: 12px;
+  border: 1px solid transparent;
+  text-decoration: none;
+}
+.drawer a:hover{ background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.08); }
+
+.drawer--open{ transform: translateY(0); opacity: 1; pointer-events: auto; }
+
+@media (max-width: 768px){
+  .topbar__nav { display: none; }
+  .topbar__toggle { display: inline-grid; }
+}
+@media (min-width: 769px){
+  .drawer { display: none; }
+}

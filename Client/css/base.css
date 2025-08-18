@@ -33,3 +33,33 @@ a:hover { text-decoration: underline; }
   from { opacity: 0; transform: translateY(10px); }
   to   { opacity: 1; transform: translateY(0); }
 }
+
+/* ===== Base responsive & RTL ===== */
+html { box-sizing: border-box; }
+*, *::before, *::after { box-sizing: inherit; }
+
+:root{
+  --nav-height: 64px;
+}
+
+body{
+  margin: 0;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
+  background: var(--bg, #0f1220);
+  color: var(--fg, #e9ecf1);
+  line-height: 1.5;
+}
+
+[dir="rtl"] { direction: rtl; }
+body::after{
+  content:"";
+  position: fixed; left:0; right:0; top:-120px; height:220px;
+  background: radial-gradient(600px 140px at 20% 50%, rgba(45,225,194,.2), transparent 60%),
+              radial-gradient(600px 140px at 80% 50%, rgba(122,184,255,.18), transparent 60%);
+  pointer-events:none; z-index:-1; filter: blur(12px) saturate(115%);
+}
+
+@media (prefers-reduced-motion: reduce){
+  *{ animation: none !important; transition: none !important; }
+  body::before, body::after{ filter:none; }
+}

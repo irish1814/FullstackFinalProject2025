@@ -92,3 +92,176 @@
   0% { background-position: 200% 0; }
   100% { background-position: -200% 0; }
 }
+
+/* ===== Navbar ===== */
+.navbar{
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  height: var(--nav-height);
+  background: #14182b;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  backdrop-filter: blur(6px);
+}
+
+.navbar__inner{
+  height: 100%;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 12px;
+}
+
+.navbar__brand{
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  letter-spacing: .3px;
+}
+
+.navbar__logo{
+  width: 28px; height: 28px; border-radius: 8px;
+  background: linear-gradient(135deg,#6ee7f9,#7c3aed);
+  display: inline-block;
+}
+
+.navbar__links{
+  justify-self: center;
+  gap: 16px;
+}
+
+.navbar__link{
+  text-decoration: none;
+  color: #cfd6ea;
+  padding: 8px 10px;
+  border-radius: 8px;
+  transition: background .2s ease;
+}
+.navbar__link:hover{ background: rgba(255,255,255,0.06); }
+
+/* כפתור המבורגר */
+.navbar__toggle{
+  appearance: none;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  width: 40px; height: 40px;
+  border-radius: 10px;
+  display: inline-grid; place-items: center;
+}
+.navbar__toggle:focus-visible{ outline: 2px solid #7c3aed; outline-offset: 2px; }
+
+.burger{
+  width: 22px; height: 2px; background: #e9ecf1;
+  position: relative; transition: transform .2s ease;
+}
+.burger::before, .burger::after{
+  content: ""; position: absolute; left: 0;
+  width: 22px; height: 2px; background: #e9ecf1;
+  transition: transform .2s ease, opacity .2s ease;
+}
+.burger::before{ top: -7px; }
+.burger::after{ top: 7px; }
+
+.navbar__toggle[aria-expanded="true"] .burger{ transform: rotate(45deg); }
+.navbar__toggle[aria-expanded="true"] .burger::before{ transform: rotate(90deg) translateX(-7px); }
+.navbar__toggle[aria-expanded="true"] .burger::after{ opacity: 0; transform: translateY(-7px); }
+
+.drawer{
+  position: fixed; inset: var(--nav-height) 0 0 auto; /* מתחת לניו-בר */
+  background: #0f1220;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  padding: 12px;
+  display: grid; gap: 8px;
+  transform: translateY(-8px); opacity: 0; pointer-events: none;
+  transition: transform .2s ease, opacity .2s ease;
+}
+.drawer--open{ transform: translateY(0); opacity: 1; pointer-events: auto; }
+
+.drawer a{
+  text-decoration: none;
+  color: #e9ecf1;
+  padding: 12px;
+  border-radius: 10px;
+}
+.drawer a:hover{ background: rgba(255,255,255,0.06); }
+
+@media (min-width: 768px){
+  .drawer{ display: none; }
+}
+.btn--magnetic { position: relative; will-change: transform; }
+
+.card--tilt{
+  transform-style: preserve-3d;
+  transition: transform var(--speed), box-shadow var(--speed);
+}
+.card--tilt:hover{
+  transform: perspective(900px) rotateX(2.2deg) rotateY(-2.2deg) translateY(-2px);
+  box-shadow: 0 18px 36px rgba(0,0,0,.35);
+}
+
+.badge--fx{
+  border-image: var(--smart-gradient) 1;
+  border-width: 1px; border-style: solid;
+}
+
+.glass-strong{
+  background: linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,.06));
+  border: 1px solid rgba(255,255,255,.18);
+  backdrop-filter: blur(18px);
+}
+
+.dock{
+  position: fixed; inset: auto 16px 18px 16px;
+  display: flex; justify-content: center; z-index: 60;
+}
+.dock__inner{
+  display: flex; gap: 8px; padding: 8px;
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.10);
+  border-radius: 999px; backdrop-filter: blur(12px);
+}
+.dock__item{
+  display:inline-grid; place-items:center; width:40px; height:40px;
+  border-radius: 50%; border:1px solid rgba(255,255,255,.12);
+  background: rgba(255,255,255,.06);
+  transition: transform var(--speed-fast), background var(--speed-fast);
+}
+.dock__item:hover{ transform: translateY(-1px); background: rgba(255,255,255,.10); }
+@media (min-width: 980px){
+  .dock{ right: 24px; left:auto; bottom: 24px; }
+}
+
+.cmdp{
+  position: fixed; inset: 0; display: grid; place-items: center; z-index: 80;
+  background: rgba(0,0,0,.45); opacity: 0; pointer-events: none; transition: opacity var(--speed);
+}
+.cmdp--open{ opacity:1; pointer-events: auto; }
+.cmdp__panel{
+  width: min(680px, 92vw); max-height: 72vh; overflow: hidden; display: grid; gap: 8px;
+  padding: 14px; border-radius: var(--radius-lg);
+  background: rgba(18,22,34,.92); backdrop-filter: blur(14px);
+  border: 1px solid rgba(255,255,255,.16); box-shadow: var(--shadow-2);
+}
+.cmdp__search{
+  width:100%; padding:12px; border-radius:12px; border:1px solid rgba(255,255,255,.12);
+  background: rgba(255,255,255,.06); color: var(--text); outline: none;
+  box-shadow: 0 0 0 0 transparent; transition: box-shadow var(--speed-fast);
+}
+.cmdp__search:focus{ box-shadow: var(--ring); }
+.cmdp__list{ overflow:auto; display:grid; gap:6px; padding-right:2px; }
+.cmdp__item{
+  display:flex; align-items:center; justify-content:space-between; gap:10px;
+  padding: 10px 12px; border-radius: 10px; border:1px solid transparent;
+  background: rgba(255,255,255,.04); cursor:pointer;
+}
+.cmdp__item:hover{ background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.12); }
+.cmdp__kbd{
+  font-size: 12px; padding: 4px 8px; border-radius: 8px;
+  background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.12);
+}
+
+.spark{
+  width: 100%; height: 34px;
+}

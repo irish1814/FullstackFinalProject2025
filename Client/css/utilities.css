@@ -5,3 +5,25 @@
 .grid { display: grid; } .cols-2 { grid-template-columns: repeat(2, 1fr); } .cols-3 { grid-template-columns: repeat(3, 1fr); }
 .center { display: grid; place-items: center; }
 .hidden { display: none; }
+/* ===== Display helpers ===== */
+.hidden { display: none !important; }
+.block  { display: block !important; }
+.flex   { display: flex !important; }
+
+.show-desktop { display: none; }
+@media (min-width: 768px){
+  .show-desktop { display: flex; }
+}
+
+.show-mobile { display: flex; }
+@media (min-width: 768px){
+  .show-mobile { display: none; }
+}
+
+.container{
+  width: min(100% - 24px, 1100px);
+  margin-inline: auto;
+}
+.text-muted{ color: var(--muted); }
+.round-full{ border-radius: 999px; }
+.shadow-1{ box-shadow: var(--shadow-1); } .shadow-2{ box-shadow: var(--shadow-2); }

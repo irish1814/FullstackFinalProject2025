@@ -12,6 +12,8 @@ import Signup from "./login&signup/signup.jsx";
 import ProfileDetails from "./login&signup/ProfileDetails.jsx";
 import NavBar from "./NavBar"; 
 import Profile from "./login&signup/Profile.jsx";
+import AdminPage from "../Client/src/Admin";
+
 
 function isAuthed() {
   return !!localStorage.getItem("token");
@@ -48,6 +50,7 @@ export default function AppRouter() {
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/signup/profileDetails" element={<ProfileDetails />} />
+          <Route path="/admin" element={<AdminPage />} />
         </Route>
 
         <Route element={<AppLayout />}>
