@@ -98,14 +98,13 @@
 .auth-actions { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-top: 10px; }
 .form__error { color: var(--danger); font-size: 13px; margin-top: 6px; }
 
-/* ===== Two-Column Page ===== */
 .page-grid{
   display: grid;
   gap: 16px;
 }
 @media (min-width: 768px){
   .page-grid{
-    grid-template-columns: 1fr 1fr; /* שני טורים בדסקטופ */
+    grid-template-columns: 1fr 1fr; 
     align-items: start;
   }
 }
@@ -149,10 +148,9 @@
 .burger::before{ top: -7px; }
 .burger::after{ top: 7px; }
 
-/* Drawer למובייל – מתחת ל־topbar */
 .drawer{
   position: fixed;
-  top: 56px;               /* גובה מקורב של ה־topbar; אם צריך, תעדכן */
+  top: 56px;               
   left: 0; right: 0;
   background: rgba(12,15,20,0.98);
   border-top: 1px solid rgba(255,255,255,0.10);
