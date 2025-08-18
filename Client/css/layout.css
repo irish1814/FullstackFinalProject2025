@@ -42,3 +42,58 @@
   display: grid; gap: var(--gap-lg);
   animation: fadeUp 320ms ease-out;
 }
+/* Top Navigation Bar */
+.topbar {
+  position: sticky; top: 0; z-index: 50;
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; padding: 12px clamp(16px, 3vw, 28px);
+  backdrop-filter: blur(var(--glass-blur));
+  background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
+  border-bottom: 1px solid rgba(255,255,255,0.10);
+}
+
+.topbar__brand {
+  display: flex; align-items: center; gap: 10px; font-weight: 800; letter-spacing: 0.3px;
+}
+.topbar__dot {
+  width: 12px; height: 12px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary), var(--info));
+  box-shadow: 0 0 14px rgba(45,225,194,0.6);
+}
+
+.topbar__nav {
+  display: flex; align-items: center; gap: 6px;
+}
+.topbar__nav a {
+  padding: 8px 12px; border-radius: 12px; color: var(--text);
+  border: 1px solid transparent;
+}
+.topbar__nav a:hover { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.08); }
+.topbar__nav a.active { background: rgba(45,225,194,0.12); border-color: rgba(45,225,194,0.28); }
+
+.topbar__right {
+  display: flex; align-items: center; gap: 8px;
+}
+.avatar {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.5), rgba(255,255,255,.1) 60%),
+              linear-gradient(135deg, #1b6, #28a);
+  border: 1px solid rgba(255,255,255,0.20);
+}
+
+.auth-wrap {
+  min-height: calc(100vh - 64px);
+  display: grid; place-items: center; padding: clamp(16px, 3vw, 28px);
+}
+.auth-card {
+  width: min(520px, 92vw);
+  background: var(--surface-strong);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-2);
+  padding: clamp(18px, 3vw, 28px);
+}
+.auth-title { margin-bottom: 6px; }
+.auth-subtitle { color: var(--muted); margin-bottom: 16px; }
+.auth-actions { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-top: 10px; }
+.form__error { color: var(--danger); font-size: 13px; margin-top: 6px; }

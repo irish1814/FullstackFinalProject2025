@@ -1,19 +1,32 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
+import "../css/index.css";
 
 export default function Signup() {
   const nav = useNavigate();
-  const [form, setForm] = useState({ email: "", password: "", confirm: "" });
+
+  // סטייט יחיד לכל השדות
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    password: "",
+    confirm: ""
+  });
+
   const [err, setErr] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [show, setShow] = useState(false); // הצגת/הסתרת סיסמאות
 
   function onChange(e) {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setForm(prev => ({ ...prev, [name]: value }));
   }
 
   function onSubmit(e) {
     e.preventDefault();
     setErr("");
 
+    // ולידציה בסיסית
     if (!form.email || !form.password || !form.confirm) {
       setErr("נא למלא אימייל, סיסמה ואימות סיסמה");
       return;
@@ -27,31 +40,94 @@ export default function Signup() {
       return;
     }
 
-    nav("/signup/profileDetails", { state: { email: form.email, password: form.password } });
+    // מעבר לשלב פרטי הפרופיל – מעבירים state
+    setLoading(true);
+    nav("/signup/profileDetails", {
+      state: { email: form.email.trim(), password: form.password, name: form.name.trim() }
+    });
   }
 
   return (
-    <form onSubmit={onSubmit}>
-      <h1>הרשמה</h1>
+    <div className="auth-wrap">
+      <section className="auth-card" role="region" aria-labelledby="signup-title">
+        <h1 id="signup-title" className="auth-title">Create your account</h1>
+        <p className="auth-subtitle">It takes less than a minute</p>
 
-      <label>
-        אימייל:
-        <input name="email" type="email" value={form.email} onChange={onChange} />
-      </label>
+        <form className="form" onSubmit={onSubmit} noValidate>
+          <div className="form__row">
+            <label className="form__label" htmlFor="name">Full name</label>
+            <input
+              id="name"
+              name="name"
+              className="input"
+              value={form.name}
+              onChange={onChange}
+              placeholder="John Doe"
+            />
+          </div>
 
-      <label>
-        סיסמה:
-        <input name="password" type="password" value={form.password} onChange={onChange} />
-      </label>
+          <div className="form__row">
+            <label className="form__label" htmlFor="email">Email</label>
+            <input
+              id="email"
+              name="email"
+              className="input"
+              type="email"
+              autoComplete="email"
+              value={form.email}
+              onChange={onChange}
+              required
+            />
+          </div>
 
-      <label>
-        אימות סיסמה:
-        <input name="confirm" type="password" value={form.confirm} onChange={onChange} />
-      </label>
+          <div className="form__row">
+            <label className="form__label" htmlFor="password">Password</label>
+            <div className="flex gap-1">
+              <input
+                id="password"
+                name="password"
+                className="input"
+                type={show ? "text" : "password"}
+                value={form.password}
+                onChange={onChange}
+                required
+              />
+              <button type="button" className="btn" onClick={() => setShow(s => !s)}>
+                {show ? "Hide" : "Show"}
+              </button>
+            </div>
+            <span className="form__hint">At least 8 chars. Use letters &amp; numbers.</span>
+          </div>
 
-      {err && <div>{err}</div>}
+          <div className="form__row">
+            <label className="form__label" htmlFor="confirm">Confirm password</label>
+            <input
+              id="confirm"
+              name="confirm"
+              className="input"
+              type={show ? "text" : "password"}
+              value={form.confirm}
+              onChange={onChange}
+              required
+            />
+          </div>
 
-      <button type="submit">המשך</button>
-    </form>
+          {err && <div className="form__error" aria-live="polite">{err}</div>}
+
+          <div className="auth-actions">
+            <button
+              className="btn btn--primary"
+              type="submit"
+              disabled={loading || !form.email || !form.password || !form.confirm}
+            >
+              {loading ? "Redirecting…" : "Create account"}
+            </button>
+            <span className="form__hint">
+              Already have an account? <Link to="/login">Log in</Link>
+            </span>
+          </div>
+        </form>
+      </section>
+    </div>
   );
 }

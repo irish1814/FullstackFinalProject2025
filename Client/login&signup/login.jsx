@@ -1,13 +1,14 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-// אם הקובץ אצלך ב-service השאר כך; אם לא – שנה ל"../BankServices/auth.service.jsx"
 import { AuthService } from "../BankServices/service/auth.service.jsx";
+import "../css/index.css";
 
 export default function Login() {
   const nav = useNavigate();
   const [form, setForm] = useState({ email: "", password: "" });
   const [err, setErr] = useState("");
   const [loading, setLoading] = useState(false);
+  const [show, setShow] = useState(false);
 
   function onChange(e) {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -26,48 +27,67 @@ export default function Login() {
       localStorage.setItem("token", token);
       if (user?.email) localStorage.setItem("email", user.email);
       nav("/dashboard");
-    } catch (e) {
-      setErr(e.message || "שגיאת התחברות");
+    } catch (e2) {
+      setErr(e2?.message || "שגיאת התחברות");
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <form onSubmit={onSubmit}>
-      <h1>Login</h1>
+    <div className="auth-wrap">
+      <section className="auth-card" role="region" aria-labelledby="login-title">
+        <h1 id="login-title" className="auth-title">Welcome back</h1>
+        <p className="auth-subtitle">Log in to your secure banking dashboard</p>
 
-      <label>
-        Email:
-        <input
-          name="email"
-          type="email"
-          value={form.email}
-          onChange={onChange}
-          placeholder="you@example.com"
-        />
-      </label>
+        <form className="form" onSubmit={onSubmit} noValidate>
+          <div className="form__row">
+            <label className="form__label" htmlFor="email">Email</label>
+            <input
+              id="email"
+              name="email"
+              className="input"
+              type="email"
+              autoComplete="email"
+              value={form.email}
+              onChange={onChange}
+              required
+            />
+            <span className="form__hint">Use the email you registered with</span>
+          </div>
 
-      <label>
-        Password:
-        <input
-          name="password"
-          type="password"
-          value={form.password}
-          onChange={onChange}
-          placeholder="••••••••"
-        />
-      </label>
+          <div className="form__row">
+            <label className="form__label" htmlFor="password">Password</label>
+            <div className="flex gap-1">
+              <input
+                id="password"
+                name="password"
+                className="input"
+                type={show ? "text" : "password"}
+                autoComplete="current-password"
+                value={form.password}
+                onChange={onChange}
+                required
+              />
+              <button type="button" className="btn" onClick={() => setShow(s => !s)}>
+                {show ? "Hide" : "Show"}
+              </button>
+            </div>
+            <span className="form__hint">8+ chars, keep it private</span>
+          </div>
 
-      {err && <div>{err}</div>}
+          {err && <div className="form__error" aria-live="polite">{err}</div>}
 
-      <button type="submit" disabled={loading}>
-        {loading ? "Loading..." : "Login"}
-      </button>
-
-      <p>
-        אין לך חשבון? <Link to="/signup">הירשם</Link>
-      </p>
-    </form>
+          <div className="auth-actions">
+            <button className="btn btn--primary" type="submit" disabled={loading || !form.email || !form.password}>
+              {loading ? "Logging in..." : "Log in"}
+            </button>
+            <span className="form__hint">
+              No account? <Link to="/signup">Create one</Link>
+            </span>
+          </div>
+        </form>
+      </section>
+    </div>
   );
 }

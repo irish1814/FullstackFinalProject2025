@@ -5,6 +5,9 @@ export const LoansService = {
   request: ({ amount, termMonths }) =>
     http("/loans/request", { method: "POST", data: { amount, termMonths } }),
   repay: ({ loanId, amount }) =>
-    http(`/loans/${loanId}/repay`, { method: "POST", data: { amount } })
+    http(`/loans/${loanId}/repay`, { method: "POST", data: { amount } }),
+  request: ({ amount, termMonths, annualRate }) =>
+  http("/loans/request", { method: "POST", data: { amount, termMonths, annualRate } }),
+
 };
 

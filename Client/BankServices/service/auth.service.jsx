@@ -1,11 +1,18 @@
-import { http } from "../http";
+import { http } from "../http.jsx";
 
 export const AuthService = {
-  login: (email, password) =>
-    http("/auth/login", { method: "POST", data: { email, password } }),
+  login: async (email, password) => {
+    const res = await http("/auth/login", { method: "POST", data: { email, password } });
+    if (res?.token) localStorage.setItem("token", res.token);
+    if (res?.user?.email) localStorage.setItem("email", res.user.email);
+    return res;
+  },
 
-  signup: (payload) =>
-    http("/auth/register", { method: "POST", data: payload }),
+  me: async () => {
+    return await http("/auth/me"); // ודא שהשרת שולח { name, email, phone, country, street, city, address, age, dob ... }
+  },
 
-  me: (token) => http("/auth/me", { token })
+  signup: async (payload) => {
+    return await http("/auth/signup", { method: "POST", data: payload });
+  },
 };

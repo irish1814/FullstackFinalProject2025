@@ -1,13 +1,17 @@
 import React from "react";
-import { BrowserRouter, Routes, Route, Navigate, Link, useLocation, useNavigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, Outlet, useLocation } from "react-router-dom";
 import Dashboard from "./BankServices/Dashboard.jsx";
 import Accounts from "./BankServices/Accounts.jsx";
 import Transactions from "./BankServices/Transactions.jsx";
 import Transfers from "./BankServices/Transfers.jsx";
 import Loans from "./BankServices/Loans.jsx";
+import Savings from "./BankServices/Savings.jsx";
+import CurrencyExchange from "./BankServices/CurrencyExchange.jsx";
 import Login from "./login&signup/login.jsx";
 import Signup from "./login&signup/signup.jsx";
 import ProfileDetails from "./login&signup/ProfileDetails.jsx";
+import NavBar from "./NavBar"; 
+import Profile from "./login&signup/Profile.jsx";
 
 function isAuthed() {
   return !!localStorage.getItem("token");
@@ -17,48 +21,70 @@ function RequireAuth({ children }) {
   return isAuthed() ? children : <Navigate to="/login" replace />;
 }
 
-function Nav() {
+function AppLayout() {
   const location = useLocation();
-  const nav = useNavigate();
-
-  const hideOnPaths = ["/login", "/signup"];
-  const onSignupFlow = location.pathname.startsWith("/signup"); // כולל /signup/profileDetails
-  if (!isAuthed() || hideOnPaths.includes(location.pathname) || onSignupFlow) return null;
-
-  const logout = () => {
-    localStorage.removeItem("token");
-    nav("/login", { replace: true });
-  };
+  const hideOn = ["/login", "/signup", "/signup/profileDetails"];
+  const showNav = isAuthed() && !hideOn.includes(location.pathname);
 
   return (
-    <nav>
-      <Link to="/dashboard">Dashboard</Link> |{" "}
-      <Link to="/accounts">Accounts</Link> |{" "}
-      <Link to="/transactions">Transactions</Link> |{" "}
-      <Link to="/transfers">Transfers</Link> |{" "}
-      <Link to="/loans">Loans</Link> |{" "}
-      <button onClick={logout}>Logout</button>
-    </nav>
+    <>
+      {showNav && <NavBar />}
+      <main className="content">
+        <div className="container">
+          <Outlet />
+        </div>
+      </main>
+    </>
   );
 }
 
 export default function AppRouter() {
   return (
     <BrowserRouter>
-      <Nav />
       <Routes>
         <Route path="/" element={<Navigate to="/login" replace />} />
 
-        <Route path="/signup" element={<Signup />} />
-        <Route path="/signup/profileDetails" element={<ProfileDetails />} />
+        <Route element={<AppLayout />}>
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/signup/profileDetails" element={<ProfileDetails />} />
+        </Route>
 
-        <Route path="/login" element={<Login />} />
-
-        <Route path="/dashboard" element={<RequireAuth><Dashboard /></RequireAuth>} />
-        <Route path="/accounts" element={<RequireAuth><Accounts /></RequireAuth>} />
-        <Route path="/transactions" element={<RequireAuth><Transactions /></RequireAuth>} />
-        <Route path="/transfers" element={<RequireAuth><Transfers /></RequireAuth>} />
-        <Route path="/loans" element={<RequireAuth><Loans /></RequireAuth>} />
+        <Route element={<AppLayout />}>
+          <Route
+            path="/dashboard"
+            element={<RequireAuth><Dashboard /></RequireAuth>}
+          />
+          <Route
+            path="/accounts"
+            element={<RequireAuth><Accounts /></RequireAuth>}
+          />
+          <Route
+            path="/transactions"
+            element={<RequireAuth><Transactions /></RequireAuth>}
+          />
+          <Route
+            path="/transfers"
+            element={<RequireAuth><Transfers /></RequireAuth>}
+          />
+          <Route
+            path="/loans"
+            element={<RequireAuth><Loans /></RequireAuth>}
+          />
+          <Route
+            path="/savings"
+            element={<RequireAuth><Savings /></RequireAuth>}
+          />
+          <Route
+            path="/exchange"
+            element={<RequireAuth><CurrencyExchange /></RequireAuth>}
+          />
+        </Route>
+        <Route 
+         path="/profile"
+          element={<RequireAuth><Profile /></RequireAuth>}
+        />
+        
 
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>

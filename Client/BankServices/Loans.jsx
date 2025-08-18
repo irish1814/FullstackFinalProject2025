@@ -9,6 +9,7 @@ export default function Loans() {
   const [repayId, setRepayId] = useState("");
   const [repayAmount, setRepayAmount] = useState("");
   const [status, setStatus] = useState("");
+  const FIXED_RATE = 0.5;
 
   const reload = async () => {
     const list = await LoansService.list();
@@ -28,9 +29,9 @@ export default function Loans() {
       setStatus("Please enter valid amount and term.");
       return;
     }
-    await LoansService.request({ amount: val, termMonths: months });
+    await LoansService.request({ amount: val, termMonths: months, annualRate: FIXED_RATE });
     setAmount(""); setTerm("");
-    setStatus("Loan requested (local demo).");
+    setStatus("Loan requested");
     reload();
   };
 
@@ -46,6 +47,16 @@ export default function Loans() {
     reload();
   };
 
+  const monthlyPayment = (principal, annualRate, termMonths) => {
+  const r = Number((annualRate ?? FIXED_RATE)) / 12 / 100;
+  const n = Number(termMonths || 0);
+  if (!principal || !n) return 0;
+  if (!r) return (principal / n).toFixed(2);
+  const m = principal * (r / (1 - Math.pow(1 + r, -n)));
+  return m.toFixed(2);
+};
+
+
   return (
   <div className="content">
     <div className="container">
@@ -58,13 +69,13 @@ export default function Loans() {
             <div className="list-item" key={l.id}>
               <div className="flex justify-between items-center">
                 <strong>#{l.id}</strong>
-                <span className={`badge ${l.status === 'active' ? 'badge--warn' : 'badge--ok'}`}>
-                  {l.status}
-                </span>
+                <span className={`badge ${l.status === 'active' ? 'badge--warn' : 'badge--ok'}`}>{l.status}</span>
               </div>
               <div>Principal: {l.principal}</div>
               <div>Remaining: {l.remaining}</div>
               <div>Term: {l.termMonths} months</div>
+              <div>Annual rate: {l.annualRate ?? 0}%</div>
+              <div>Monthly payment (calc): ₪{monthlyPayment(l.principal, l.annualRate, l.termMonths)}</div>
             </div>
           ))}
         </div>
@@ -75,23 +86,15 @@ export default function Loans() {
           <h3>Request new loan</h3>
           <div className="form__row">
             <label className="form__label">Amount</label>
-            <input
-              className="input"
-              type="number"
-              placeholder="Amount"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-            />
+            <input className="input" type="number" placeholder="Amount" value={amount} onChange={(e)=>setAmount(e.target.value)} />
           </div>
           <div className="form__row">
             <label className="form__label">Term (months)</label>
-            <input
-              className="input"
-              type="number"
-              placeholder="Term (months)"
-              value={term}
-              onChange={(e) => setTerm(e.target.value)}
-            />
+            <input className="input" type="number" placeholder="Term (months)" value={term} onChange={(e)=>setTerm(e.target.value)} />
+          </div>
+          <div className="form__row">
+            <label className="form__label">Annual rate</label>
+            <div className="badge">Fixed {FIXED_RATE}%</div>
           </div>
           <div className="form__actions">
             <button className="btn btn--primary" type="submit">Request</button>
@@ -102,24 +105,16 @@ export default function Loans() {
           <h3>Repay loan</h3>
           <div className="form__row">
             <label className="form__label">Loan</label>
-            <select className="select" value={repayId} onChange={(e) => setRepayId(e.target.value)}>
+            <select className="select" value={repayId} onChange={(e)=>setRepayId(e.target.value)}>
               <option value="">Choose loan</option>
-              {loans.map((l) => (
-                <option key={l.id} value={l.id}>
-                  #{l.id} – remaining {l.remaining}
-                </option>
+              {loans.map((l)=>(
+                <option key={l.id} value={l.id}>#{l.id} – remaining {l.remaining}</option>
               ))}
             </select>
           </div>
           <div className="form__row">
             <label className="form__label">Repay amount</label>
-            <input
-              className="input"
-              type="number"
-              placeholder="Repay amount"
-              value={repayAmount}
-              onChange={(e) => setRepayAmount(e.target.value)}
-            />
+            <input className="input" type="number" placeholder="Repay amount" value={repayAmount} onChange={(e)=>setRepayAmount(e.target.value)} />
           </div>
           <div className="form__actions">
             <button className="btn" type="button">Cancel</button>

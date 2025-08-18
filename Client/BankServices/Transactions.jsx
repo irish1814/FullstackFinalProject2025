@@ -10,6 +10,14 @@ export default function Transactions() {
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState("");
 
+  const summarizeByType = (rows) =>
+  rows.reduce((acc, r) => {
+    const k = r.type || 'unknown';
+    acc[k] = (acc[k] || 0) + Number(r.amount || 0);
+    return acc;
+  }, {});
+
+
   useEffect(() => {
     (async () => {
       try {
@@ -34,7 +42,7 @@ export default function Transactions() {
   if (err) return <div>Error: {err}</div>;
   if (!account) return <div>No account found.</div>;
 
-  return (
+return (
   <div className="content">
     <div className="container">
       <div className="toolbar">
@@ -46,7 +54,12 @@ export default function Transactions() {
             <option value="deposit">deposit</option>
             <option value="withdraw">withdraw</option>
             <option value="transfer">transfer</option>
+            <option value="loan_disbursement">loan_disbursement</option>
             <option value="loan_repayment">loan_repayment</option>
+            <option value="saving_deposit">saving_deposit</option>
+            <option value="saving_withdraw">saving_withdraw</option>
+            <option value="interest">interest</option>
+            <option value="fee">fee</option>
           </select>
         </div>
       </div>
@@ -73,8 +86,26 @@ export default function Transactions() {
           </tbody>
         </table>
       </div>
+
+      {/* סיכומים לניהול תקציב לפי סוג תנועה */}
+      <div className="card mt-2">
+        <h3>Budget by type</h3>
+        <table className="table mt-1">
+          <thead>
+            <tr><th>Type</th><th>Total</th></tr>
+          </thead>
+          <tbody>
+            {Object.entries(summarizeByType(filtered)).map(([k, v]) => (
+              <tr key={k}>
+                <td>{k}</td>
+                <td>{v}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
     </div>
   </div>
 );
-
 }
