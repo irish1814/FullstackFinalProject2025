@@ -21,7 +21,7 @@ export const verifyToken = (token) => {
     try {
         return jwt.verify(token, JWT_SECRET);
     } catch (err) {
-        return null; // invalid or expired
+        throw err; // invalid or expired
     }
 }
 
