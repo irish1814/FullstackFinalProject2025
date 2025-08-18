@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { AccountsService } from "./service/accounts.service"
-import { TransactionsService } from "./service/transactions.service.jsx";
 import '../css/index.css';
 
 export default function Transfers() {

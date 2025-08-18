@@ -9,7 +9,7 @@ export const AuthService = {
   },
 
   me: async () => {
-    return await http("/auth/me"); // ודא שהשרת שולח { name, email, phone, country, street, city, address, age, dob ... }
+    return await http("/auth/me"); 
   },
 
   signup: async (payload) => {

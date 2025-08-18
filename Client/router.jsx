@@ -2,7 +2,6 @@ import React from "react";
 import { BrowserRouter, Routes, Route, Navigate, Outlet, useLocation } from "react-router-dom";
 import Dashboard from "./BankServices/Dashboard.jsx";
 import Accounts from "./BankServices/Accounts.jsx";
-import Transactions from "./BankServices/Transactions.jsx";
 import Transfers from "./BankServices/Transfers.jsx";
 import Loans from "./BankServices/Loans.jsx";
 import Savings from "./BankServices/Savings.jsx";
@@ -62,10 +61,7 @@ export default function AppRouter() {
             path="/accounts"
             element={<RequireAuth><Accounts /></RequireAuth>}
           />
-          <Route
-            path="/transactions"
-            element={<RequireAuth><Transactions /></RequireAuth>}
-          />
+          
           <Route
             path="/transfers"
             element={<RequireAuth><Transfers /></RequireAuth>}

@@ -44,8 +44,7 @@ export default function NavBar() {
 
         <nav className="topbar__nav" aria-label="Main">
           <NavLink to="/dashboard" end>Dashboard</NavLink>
-          <NavLink to="/accounts">Accounts</NavLink>
-          <NavLink to="/transactions">Transactions</NavLink>
+          {role === "admin" && <NavLink to="/accounts">Accounts</NavLink>}
           <NavLink to="/transfers">Transfers</NavLink>
           <NavLink to="/loans">Loans</NavLink>
           <NavLink to="/savings">Savings</NavLink>
@@ -84,7 +83,6 @@ export default function NavBar() {
       >
         <NavLink to="/dashboard" onClick={() => setOpen(false)}>Dashboard</NavLink>
         <NavLink to="/accounts" onClick={() => setOpen(false)}>Accounts</NavLink>
-        <NavLink to="/transactions" onClick={() => setOpen(false)}>Transactions</NavLink>
         <NavLink to="/transfers" onClick={() => setOpen(false)}>Transfers</NavLink>
         <NavLink to="/loans" onClick={() => setOpen(false)}>Loans</NavLink>
         <NavLink to="/savings" onClick={() => setOpen(false)}>Savings</NavLink>
