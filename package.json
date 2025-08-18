@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev:server": "nodemon app.js",
+    "dev:server": "nodemon server/app.js",
     "dev:client": "npm --prefix Client run dev",
     "dev": "concurrently -k -n SERVER,CLIENT -c green,blue \"npm:dev:server\" \"npm:dev:client\""
   },
