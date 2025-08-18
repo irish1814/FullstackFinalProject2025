@@ -2,8 +2,10 @@ import {comparePassword, hashPassword} from '../utils/password.util.js'
 import {generateToken} from '../utils/jwt.util.js'
 import UserModel from '../models/User.model.js';
 import AccountModel from "../models/Account.model.js";
+import { ADMIN_SECRET_KEY } from '../config/env.js';
 import bcrypt from "bcrypt";
-import {ADMIN_SECRET_KEY} from '../config/env.js';
+import speakeasy from 'speakeasy';
+import qrcode from 'qrcode';
 
 export const register = async (req, res, next) => {
     try {
@@ -93,6 +95,16 @@ export const login = async (req, res, next) => {
             throw error;
         }
 
+
+        // User has 2FA enabled → wait for TOTP
+        if (user.mfa.get('twoFactorEnabled')) {
+            return res.status(200).json({
+                success: true,
+                twoFactorRequired: true,
+                userId: user._id // send this so client can use it in Step 2
+            });
+        }
+
         // Generate JWT token
         const token = generateToken({ userId: user._id });
 
@@ -104,6 +116,99 @@ export const login = async (req, res, next) => {
         });
     } catch (err) {
         next(err); // Pass error to error-handling middleware
+    }
+};
+
+export const loginWithMFA = async (req, res, next) => {
+    try {
+        const {id, twoFactorToken} = req.body;
+
+        const user = await UserModel.findOne({id});
+
+        if (!user) {
+            const error = new Error(`User does not exist`);
+            error.statusCode = 400;
+            throw error;
+        }
+
+        // Check if 2FA is enabled and valid
+        const twoFactorEnabled = user.mfa.get('twoFactorEnabled');
+        const twoFactorSecret = user.mfa.get('twoFactorSecret');
+
+        if (twoFactorEnabled) {
+            if (!twoFactorToken) {
+                const error = new Error('2FA token is required');
+                error.statusCode = 400;
+                throw error;
+            }
+
+            const isTokenValid = speakeasy.totp.verify({
+                secret: twoFactorSecret,
+                encoding: 'base32',
+                token: twoFactorToken,
+                window: 1
+            });
+
+            if (!isTokenValid) {
+                const error = new Error('Invalid 2FA token');
+                error.statusCode = 401;
+                throw error;
+            }
+        }
+    } catch (error) {
+        next(error);
+    }
+
+}
+export const GenerateMFA = async (req, res, next) => {
+    try {
+        const { id, disable } = req.body;
+
+        const user = await UserModel.findById(id);
+        if (!user) {
+            const err = new Error('User not found');
+            err.status = 404;
+            throw err;
+        }
+
+        if (disable) {
+            await UserModel.findOneAndUpdate(
+                { _id: id },
+                { $set: { 'mfa.twoFactorSecret': null, 'mfa.twoFactorEnabled': false } },
+                { new: true }
+            );
+
+            return res.status(200).send({
+                success: true,
+                message: '2FA Disabled'
+            });
+        }
+
+        // Generate secret
+        const secret = speakeasy.generateSecret({ length: 20 });
+
+        // Enable 2FA
+        await UserModel.findOneAndUpdate(
+            { _id: id },
+            { $set: { 'mfa.twoFactorSecret': secret.base32, 'mfa.twoFactorEnabled': true } },
+            { new: true }
+        );
+
+        // Optional: generate QR code for app scanning
+        const oauth_url = secret.otpauth_url;
+        const qrCodeDataURL = await qrcode.toDataURL(oauth_url);
+
+        res.status(200).send({
+            success: true,
+            data: {
+                message: '2FA enabled',
+                qrcode: qrCodeDataURL,
+                oauth_url: oauth_url,
+                secret: secret.base32
+            }
+        });
+    } catch (err) {
+        next(err);
     }
 };
 
