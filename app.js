@@ -3,6 +3,7 @@ import cors from 'cors';
 import { invalidJsonFormat, errorMiddleware }  from './server/middleware/errorHandling.middleware.js'
 import connectToDatabase from './server/database/mongodb.js';
 import authRoutes from './server/routes/auth.routes.js';
+import userRoutes from "./server/routes/user.routes.js";
 import accountRoutes from "./server/routes/account.routes.js";
 import transactionRoutes from "./server/routes/transaction.routes.js";
 import exchangeRoutes from "./server/routes/currencyExchange.routes.js";
@@ -28,6 +29,7 @@ app.use(cors({
 app.options('*', cors()); 
 
 app.use('/api/auth', authRoutes);
+app.use('/api/users', userRoutes);
 app.use('/api/accounts', accountRoutes);
 app.use('/api/transactions', transactionRoutes);
 app.use('/api/exchanges', exchangeRoutes);
