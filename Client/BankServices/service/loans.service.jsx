@@ -1,34 +1,23 @@
 import { http } from "../http.jsx";
 
 export const LoansService = {
-  list: async (accountNumber) => {
-    const acc = await http(`/accounts/${accountNumber}`);
-    return acc.loans || [];
-  },
+  list: () => http("/transactions/loans"),
 
-  request: ({ accountNumberSender, amount, termMonths, annualRate }) =>
-    http("/transactions", {
+  request: ({ accountNumberSender, transactionAmount, termMonths, annualRate }) =>
+    http("/transactions/create", {
       method: "POST",
       data: {
         accountNumberSender,
+        transactionAmount,
+        termMonths,
+        annualRate,
         typeOfTransaction: "loan",
-        transactionAmount: amount,
-        loanPayload: {
-          termMonths,
-          interestRate: annualRate,
-          monthlyPayment: amount / termMonths,
-        },
       },
     }),
 
-  repay: ({ accountNumberSender, loanId, amount }) =>
-    http("/transactions", {
+  repay: ({ loanId, amount }) =>
+    http(`/transactions/loans/${loanId}/repay`, {
       method: "POST",
-      data: {
-        accountNumberSender,
-        typeOfTransaction: "repayLoan", 
-        transactionAmount: amount,
-        loanPayload: { loanId },
-      },
+      data: { amount },
     }),
 };

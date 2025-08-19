@@ -52,7 +52,7 @@ export default function Loans() {
     try {
       await LoansService.request({
         accountNumberSender: localStorage.getItem("accountNumber"),
-        amount: val,
+        transactionAmount: amount,
         termMonths: months,
         annualRate: FIXED_RATE,
       });

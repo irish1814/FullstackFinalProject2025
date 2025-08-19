@@ -19,8 +19,6 @@ export default function Savings() {
   };
 
   const reload = async () => {
-    // כאן אפשר למשוך את התכניות מהשרת אם בנית endpoint מתאים
-    // כרגע נשתמש בדמו לוקאלי (או תחליף לפי הצורך שלך)
     setPlans([]);
   };
 

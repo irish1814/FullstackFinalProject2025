@@ -1,16 +1,23 @@
 const API_URL = import.meta.env.VITE_API_URL || "/api";
 
-export async function http(path, { method="GET", data, token, headers } = {}) {
+export async function http(path, { method = "GET", data, token, headers } = {}) {
+  const authToken = token || localStorage.getItem("token");
+
   const res = await fetch(`${API_URL}${path}`, {
     method,
     headers: {
       "Content-Type": "application/json",
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      ...(headers || {})
+      ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
+      ...headers,
     },
-    ...(data ? { body: JSON.stringify(data) } : {})
+    body: data ? JSON.stringify(data) : undefined,
   });
-  const json = await res.json().catch(() => ({}));
-  if (!res.ok) throw { status: res.status, ...json };
-  return json;
+
+  if (!res.ok) {
+    const error = new Error(`Request failed with status ${res.status}`);
+    error.status = res.status;
+    throw error;
+  }
+
+  return res.json();
 }
