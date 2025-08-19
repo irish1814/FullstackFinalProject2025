@@ -24,7 +24,7 @@ export const getLoansByAccountNumber = async (req, res, next) => {
 }
 
 // Update all loans for a given user
-const updateLoansMonthly = async (userId) => {
+export const updateLoansMonthly = async (userId) => {
     const account = await AccountModel.findOne( { userId: userId })
 
     account.loans.forEach(loan => {
@@ -47,6 +47,3 @@ const updateLoansMonthly = async (userId) => {
     await account.save();
 };
 
-module.exports = {
-    updateLoansMonthly
-};
