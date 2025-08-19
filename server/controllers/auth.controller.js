@@ -98,10 +98,24 @@ export const login = async (req, res, next) => {
 
         // User has 2FA enabled → wait for TOTP
         if (user.mfa.get('twoFactorEnabled')) {
+            const secret = user.mfa.get('twoFactorSecret');
+
+            // Generate otpauth URL (used by authenticator apps)
+            const otpauthUrl = speakeasy.otpauthURL({
+                secret,
+                label: `OnlineBank@ishay&nachman:${user.email}`, // what will appear in Google Authenticator
+                issuer: 'OnlineBank@ishay&nachman',
+                encoding: 'base32'
+            });
+
             return res.status(200).json({
                 success: true,
-                twoFactorRequired: true,
-                userId: user._id // send this so client can use it in Step 2
+                data: {
+                    message: 'Send the user id with field id and the 6 digit code with field twoFactorToken',
+                    twoFactorRequired: true,
+                    oauth_url: otpauthUrl,
+                    userId: user._id
+                }
             });
         }
 
@@ -121,54 +135,56 @@ export const login = async (req, res, next) => {
 
 export const loginWithMFA = async (req, res, next) => {
     try {
-        const {id, twoFactorToken} = req.body;
+        const { id, twoFactorToken } = req.body;
 
-        const user = await UserModel.findOne({id});
-
+        const user = await UserModel.findById(id);
         if (!user) {
             const error = new Error(`User does not exist`);
             error.statusCode = 400;
             throw error;
         }
 
-        // Check if 2FA is enabled and valid
         const twoFactorEnabled = user.mfa.get('twoFactorEnabled');
         const twoFactorSecret = user.mfa.get('twoFactorSecret');
 
-        if (twoFactorEnabled) {
-            if (!twoFactorToken) {
-                const error = new Error('2FA token is required');
-                error.statusCode = 400;
-                throw error;
-            }
-
-            const isTokenValid = speakeasy.totp.verify({
-                secret: twoFactorSecret,
-                encoding: 'base32',
-                token: twoFactorToken,
-                window: 1
-            });
-
-            if (!isTokenValid) {
-                const error = new Error('Invalid 2FA token');
-                error.statusCode = 401;
-                throw error;
-            }
-
-            // TOTP verified → generate JWT and find matching account
-            const jwtToken = generateToken({ userId: user._id });
-            const account = await AccountModel.findOne({ userId: user._id });
-
-            res.status(200).json({ success: true,
-                message: 'User signed in successfully',
-                data: { jwtToken, user, account }
-            });
+        if (!twoFactorEnabled) {
+            const error = new Error('2FA is not enabled for this user');
+            error.statusCode = 400;
+            throw error;
         }
+
+        if (!twoFactorToken) {
+            const error = new Error('2FA token is required');
+            error.statusCode = 400;
+            throw error;
+        }
+
+        const isTokenValid = speakeasy.totp.verify({
+            secret: twoFactorSecret,
+            encoding: 'base32',
+            token: twoFactorToken,
+            window: 2
+        });
+
+        if (!isTokenValid) {
+            const error = new Error('Invalid 2FA token');
+            error.statusCode = 401;
+            throw error;
+        }
+
+        // ✅ Token verified → sign JWT and return
+        const jwtToken = generateToken({ userId: id });
+        const account = await AccountModel.findOne({ userId: id });
+
+        res.status(200).json({
+            success: true,
+            message: 'User signed in successfully',
+            data: { jwtToken, user, account }
+        });
     } catch (error) {
         next(error);
     }
-
-}
+};
 
 export const GenerateMFA = async (req, res, next) => {
     try {

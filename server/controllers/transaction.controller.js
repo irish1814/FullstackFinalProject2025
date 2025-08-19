@@ -4,37 +4,34 @@ import AccountModel from "../models/Account.model.js";
 // Create a new transaction
 export const createTransaction = async (req, res, next) => {
     try {
-        const { accountNumber, accountId, type, description, transactionAmount, extra, recipientAccountId } = req.body;
+        const { accountNumberSender, accountNumberReceiver, typeOfTransaction, description, transactionAmount, extra } = req.body;
 
         // Basic validation
-        if (!accountNumber || !accountId || !type || !transactionAmount) {
+        if (!accountNumberSender || !typeOfTransaction || !transactionAmount) {
             const error = new Error("Missing required fields");
             error.statusCode = 400;
             throw error;
         }
 
-        // Ensure the sender account exists
-        const account = await AccountModel.findById(accountId);
-        if (!account) {
-            const error = new Error("Account not found");
+        const senderAccount = await AccountModel.findOne( { accountNumber: accountNumberSender } );
+
+        // Ensure the sender & receiver account exists
+        if (!senderAccount) {
+            const error = new Error("Sender Account not found");
             error.statusCode = 404;
             throw error;
         }
 
-        let recipientAccount = null;
-        if (type === "transfer") {
-            if (!recipientAccountId) {
-                const error = new Error("Recipient account ID required for transfer");
-                error.statusCode = 400;
-                throw error;
-            }
-            recipientAccount = await AccountModel.findById(recipientAccountId);
-            if (!recipientAccount) {
-                const error = new Error("Recipient account not found");
-                error.statusCode = 404;
-                throw error;
-            }
-            if (account.balance + account.overdraftLimit < transactionAmount) {
+        if (!accountNumberReceiver && typeOfTransaction === "transfer") {
+            const error = new Error("Receiver Account not found");
+            error.statusCode = 404;
+            throw error;
+        }
+
+        const receiverAccount = await AccountModel.findOne( { accountNumber: accountNumberReceiver });
+
+        if (typeOfTransaction === "transfer") {
+            if (senderAccount.balance + senderAccount.overdraftLimit < transactionAmount) {
                 const error = new Error("Insufficient funds for transfer");
                 error.statusCode = 400;
                 throw error;
@@ -42,34 +39,46 @@ export const createTransaction = async (req, res, next) => {
         }
 
         // Create the transaction
-        const transaction = new TransactionModel({
-            accountNumber,
-            accountId,
-            type,
-            description,
-            transactionAmount,
-            recipientAccountId: recipientAccountId || null
+        const transaction = await new TransactionModel({
+            accountNumber: accountNumberSender,
+            accountId: senderAccount.id,
+            type: typeOfTransaction,
+            description: description,
+            transactionAmount: transactionAmount,
+            receiverAccountNumber: accountNumberReceiver,
         });
 
         let error = new Error("Transaction type is invalid");
 
         // Update account balances based on transaction type
-        switch (type) {
+        switch (typeOfTransaction) {
+            case "transfer":
+                // Deduct from sender
+                senderAccount.balance -= transactionAmount;
+                // Add to recipient
+                TransactionModel.findByIdAndUpdate(
+                    { id: receiverAccount.id },
+                    { balance: receiverAccount.balance += transactionAmount }
+                );
+                await receiverAccount.save();
+                break;
+
             case "deposit":
-                account.balance += transactionAmount;
+                TransactionModel.findByIdAndUpdate(
+                    { accountNumber: accountNumberSender },
+                    { balance: senderAccount.balance += transactionAmount }
+                );
                 break;
 
             case "withdrawal":
-                if (account.balance + account.overdraftLimit < transactionAmount) {
-                    const error = new Error("Insufficient funds");
-                    error.statusCode = 400;
-                    throw error;
-                }
-                account.balance -= transactionAmount;
+                TransactionModel.findByIdAndUpdate(
+                    { accountNumber: accountNumberSender },
+                    { balance: senderAccount.balance -= transactionAmount }
+                );
                 break;
 
             case "loan":
-                account.loans.push({
+                senderAccount.loans.push({
                     name: extra?.name || "Loan",
                     principal: transactionAmount,
                     remainingBalance: transactionAmount,
@@ -82,7 +91,7 @@ export const createTransaction = async (req, res, next) => {
                 break;
 
             case "saving":
-                account.savingsPlans.push({
+                senderAccount.savingsPlans.push({
                     name: extra?.name || "Saving",
                     balance: transactionAmount,
                     targetAmount: extra?.targetAmount || transactionAmount,
@@ -91,7 +100,7 @@ export const createTransaction = async (req, res, next) => {
                     maturityDate: extra?.maturityDate || null,
                     isLocked: extra?.isLocked || false
                 });
-                account.balance -= transactionAmount;
+                senderAccount.balance -= transactionAmount;
                 break;
 
             case "currencyExchange":
@@ -105,14 +114,6 @@ export const createTransaction = async (req, res, next) => {
                 throw error;
                 break;
 
-            case "transfer":
-                // Deduct from sender
-                account.balance -= transactionAmount;
-                // Add to recipient
-                recipientAccount.balance += transactionAmount;
-                await recipientAccount.save();
-                break;
-
             default:
                 error = new Error("Invalid transaction type");
                 error.statusCode = 400;
@@ -120,13 +121,21 @@ export const createTransaction = async (req, res, next) => {
         }
 
         await transaction.save();
-        await account.save();
+        await senderAccount.save();
 
-        res.status(201).json({ transaction, account, recipientAccount: recipientAccount || null });
+        res.status(201).json({
+            success: true,
+            data: {
+                Transaction: transaction,
+                senderAccountNumber: accountNumberSender,
+                receiverAccountNumber: accountNumberReceiver
+            }
+        });
     } catch (err) {
         next(err);
     }
 };
+
 // Get all transactions
 export const getAllTransactions = async (req, res, next) => {
     try {
@@ -163,3 +172,14 @@ export const getTransactionsByAccount = async (req, res, next) => {
         next(err);
     }
 };
+
+export const deleteTransactions = async (req, res, next) => {
+    await TransactionModel.collection.drop();
+
+    await TransactionModel.updateMany(
+        { receiverAccountNumber: { $exists: false } },
+        { $set: { receiverAccountNumber: null } }
+    );
+
+    res.status(200).send({ success: true });
+}
