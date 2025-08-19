@@ -18,9 +18,6 @@ async function api(path, opts = {}) {
 }
 
 export default function Dashboard() {
-  const role = localStorage.getItem("role"); 
-  const isAdmin = role === "admin";
-
   const [accounts, setAccounts] = useState([]);
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -33,15 +30,12 @@ export default function Dashboard() {
         setLoading(true);
 
         const accountNumber = localStorage.getItem("accountNumber");
-
-          const accRes = await api(`/accounts/${accountNumber}`);
+        const accRes = await api(`/accounts/${accountNumber}`);
         const txRes = await api(`/transactions/account/${accountNumber}`);
-          console.log(accRes)
-          console.log(txRes)
 
         if (!alive) return;
-        setAccounts(Array.isArray(accRes?.data) ? accRes.data.account : []);
-        setTransactions(Array.isArray(txRes) ? txRes : txRes?.data.transactions ?? []);
+        setAccounts(accRes?.data?.account ? [accRes.data.account] : []);
+        setTransactions(txRes?.data?.transactions ?? []);
       } catch (e) {
         if (!alive) return;
         setErr(e.message || "Failed to load dashboard data");
@@ -53,24 +47,16 @@ export default function Dashboard() {
     return () => {
       alive = false;
     };
-  }, [isAdmin]);
+  }, []);
 
   const primaryAccount = accounts[0] || null;
-
-  const totals = useMemo(() => {
-    const sum = (arr, k) => arr.reduce((s, x) => s + (Number(x[k]) || 0), 0);
-    return {
-      accountsCount: accounts.length,
-      balanceTotal: sum(accounts, "balance"),
-    };
-  }, [accounts]);
 
   const recentTx = useMemo(() => {
     const sorted = [...transactions].sort(
       (a, b) => new Date(b.date) - new Date(a.date)
     );
-    return sorted.slice(0, isAdmin ? 10 : 5);
-  }, [transactions, isAdmin]);
+    return sorted.slice(0, 5);
+  }, [transactions]);
 
   if (loading) return <div>Loading...</div>;
   if (err) return <div>Error: {err}</div>;
@@ -82,21 +68,9 @@ export default function Dashboard() {
           <h1>Dashboard</h1>
         </div>
 
+        {/* חשבון אישי */}
         <section className="kpis">
-          {isAdmin ? (
-            <>
-              <div className="kpi">
-                <div className="kpi__label">Total Accounts</div>
-                <div className="kpi__value">{totals.accountsCount}</div>
-              </div>
-              <div className="kpi">
-                <div className="kpi__label">Total Balance (all)</div>
-                <div className="kpi__value">
-                  {totals.balanceTotal.toLocaleString()} ₪
-                </div>
-              </div>
-            </>
-          ) : primaryAccount ? (
+          {primaryAccount ? (
             <>
               <div className="kpi">
                 <div className="kpi__label">Account Number</div>
@@ -114,48 +88,35 @@ export default function Dashboard() {
           )}
         </section>
 
-        <div className="grid-panels">
-          <div className="card card--em">
-            <h3>{isAdmin ? "System Summary" : "Account Summary"}</h3>
-            {isAdmin ? (
-              <div className="mt-2">
-                <p><strong>Accounts:</strong> {totals.accountsCount}</p>
-                <p><strong>Total Balance:</strong> {totals.balanceTotal.toLocaleString()} ₪</p>
-              </div>
-            ) : primaryAccount ? (
-              <div className="mt-2">
-                <p>Type: {primaryAccount.accountType}</p>
-                <p>Status: <span className="badge badge--ok">{primaryAccount.status || "active"}</span></p>
-              </div>
-            ) : (
-              <div className="mt-2">No account selected.</div>
-            )}
-          </div>
-
-          <div className="card">
-            <h3>Shortcuts</h3>
-            <div className="mt-2 flex gap-2">
-              <button className="btn btn--primary">Transfer</button>
-              <button className="btn">Deposit</button>
-              <button className="btn btn--ghost">Loans</button>
+        {/* פרטי החשבון */}
+        {primaryAccount && (
+          <div className="card card--em mt-2">
+            <h3>Account Summary</h3>
+            <div className="mt-2">
+              <p>Type: {primaryAccount.accountType}</p>
+              <p>
+                Status:{" "}
+                <span className="badge badge--ok">
+                  {primaryAccount.status || "active"}
+                </span>
+              </p>
             </div>
           </div>
-        </div>
+        )}
 
+        {/* תנועות אחרונות */}
         <div className="card card--tilt mt-2">
-          <h3>{isAdmin ? "Recent Transactions (All)" : "Recent Transactions"}</h3>
-
+          <h3>Recent Transactions</h3>
           {recentTx.length === 0 ? (
             <p className="text-muted mt-1">No transactions found.</p>
           ) : (
-            <div style={{ overflowX: "auto", marginTop: 8 }}>
+            <div className="table-container">
               <table className="table">
                 <thead>
                   <tr>
-                    {isAdmin && <th>User</th>}
                     <th>Date</th>
                     <th>Description</th>
-                    <th style={{ textAlign: "right" }}>Amount</th>
+                    <th className="text-right">Amount</th>
                     <th>Currency</th>
                     <th>Status</th>
                   </tr>
@@ -163,31 +124,23 @@ export default function Dashboard() {
                 <tbody>
                   {recentTx.map((tx) => (
                     <tr key={tx._id || tx.id}>
-                      {isAdmin && <td>{tx.userEmail || tx.userId || "-"}</td>}
                       <td>{tx.date ? new Date(tx.date).toLocaleString() : "-"}</td>
                       <td>{tx.description || tx.note || "-"}</td>
-                      <td style={{ textAlign: "right" }}>
+                      <td className="text-right">
                         <span
-                          style={{
-                            fontWeight: 700,
-                            color: Number(tx.amount) < 0 ? "#ff5d73" : "rgb(37, 211, 102)",
-                          }}
+                          className={
+                            Number(tx.amount) < 0
+                              ? "amount-negative"
+                              : "amount-positive"
+                          }
                         >
                           {Number(tx.amount) < 0 ? "" : "+"}
                           {tx.amount}
                         </span>
                       </td>
-                      <td>{tx.currency || (primaryAccount && primaryAccount.currency) || "-"}</td>
+                      <td>{tx.currency || primaryAccount.currency || "-"}</td>
                       <td>
-                        <span
-                          className={`badge ${
-                            (tx.status || "").toLowerCase() === "completed"
-                              ? "badge--ok"
-                              : (tx.status || "").toLowerCase() === "pending"
-                              ? "badge--warn"
-                              : "badge--danger"
-                          }`}
-                        >
+                        <span className={`badge status-${(tx.status || "completed").toLowerCase()}`}>
                           {tx.status || "completed"}
                         </span>
                       </td>

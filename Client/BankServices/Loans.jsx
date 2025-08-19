@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { AccountsService } from "./service/accounts.service";
-import { TransactionsService } from "./service/transactions.service";
-import '../css/index.css';
+import { LoansService } from "./service/loans.service";
+import "../css/index.css";
 
 export default function Loans() {
   const [loans, setLoans] = useState([]);
@@ -10,56 +10,59 @@ export default function Loans() {
   const [amount, setAmount] = useState("");
   const [term, setTerm] = useState("");
   const [status, setStatus] = useState("");
-  const FIXED_RATE = 0.5;
+  const FIXED_RATE = 0.5; 
 
   const reload = async () => {
-    setLoans([]);
+    try {
+      if (!fromAccount) return;
+      const acc = await AccountsService.getAccount(fromAccount);
+      setLoans(acc.loans || []);
+    } catch (err) {
+      setStatus(err.message || "Failed to load loans");
+    }
   };
 
   useEffect(() => {
     (async () => {
       const accs = await AccountsService.getAccounts();
       setAccounts(accs);
-      if (accs[0]) setFromAccount(accs[0].accountNumber);
+      if (accs[0]) {
+        setFromAccount(accs[0].accountNumber);
+      }
     })();
-    reload();
   }, []);
+
+  useEffect(() => {
+    if (fromAccount) {
+      reload();
+    }
+  }, [fromAccount]);
 
   const onRequest = async (e) => {
     e.preventDefault();
     setStatus("");
     const val = Number(amount);
     const months = Number(term);
-    if (!fromAccount || !val || val <= 0 || !months || months <= 0) {
+
+    if ( !val || val <= 0 || !months || months <= 0) {
       setStatus("Please enter valid account, amount and term.");
       return;
     }
+
     try {
-      await TransactionsService.create({
-        accountNumberSender: fromAccount,
-        typeOfTransaction: "loan",
-        transactionAmount: val,
-        loanPayload: {
-          termMonths: months,
-          interestRate: FIXED_RATE,
-          monthlyPayment: val / months
-        }
+      await LoansService.request({
+        accountNumberSender: localStorage.getItem("accountNumber"),
+        amount: val,
+        termMonths: months,
+        annualRate: FIXED_RATE,
       });
-      setAmount(""); setTerm("");
+      setAmount("");
+      setTerm("");
       setStatus("Loan requested successfully.");
       reload();
     } catch (err) {
       setStatus(err.message || "Loan request failed.");
     }
-  };
-
-  const monthlyPayment = (principal, annualRate, termMonths) => {
-    const r = Number((annualRate ?? FIXED_RATE)) / 12 / 100;
-    const n = Number(termMonths || 0);
-    if (!principal || !n) return 0;
-    if (!r) return (principal / n).toFixed(2);
-    const m = principal * (r / (1 - Math.pow(1 + r, -n)));
-    return m.toFixed(2);
   };
 
   return (
@@ -73,17 +76,24 @@ export default function Loans() {
             {loans.length === 0 ? (
               <div>No loans yet.</div>
             ) : (
-              loans.map((l) => (
-                <div className="list-item" key={l.id}>
+              loans.map((l, idx) => (
+                <div className="list-item" key={l._id || idx}>
                   <div className="flex justify-between items-center">
-                    <strong>#{l.id}</strong>
-                    <span className={`badge ${l.status === 'active' ? 'badge--warn' : 'badge--ok'}`}>{l.status}</span>
+                    <strong>#{l._id || idx}</strong>
+                    <span
+                      className={`badge ${
+                        l.isPaid ? "badge--ok" : "badge--warn"
+                      }`}
+                    >
+                      {l.isPaid ? "closed" : "active"}
+                    </span>
                   </div>
                   <div>Principal: {l.principal}</div>
-                  <div>Remaining: {l.remaining}</div>
+                  <div>Remaining: {l.remainingBalance}</div>
                   <div>Term: {l.termMonths} months</div>
-                  <div>Annual rate: {l.annualRate ?? 0}%</div>
-                  <div>Monthly payment (calc): ₪{monthlyPayment(l.principal, l.annualRate, l.termMonths)}</div>
+                  <div>Annual rate: {l.interestRate ?? FIXED_RATE}%</div>
+                  <div>Monthly payment: ₪{l.monthlyPayment}</div>
+                  <div>Due date: {new Date(l.dueDate).toLocaleDateString()}</div>
                 </div>
               ))
             )}
@@ -95,40 +105,44 @@ export default function Loans() {
             <h3>Request new loan</h3>
 
             <div className="form__row">
-              <label className="form__label">From account</label>
-              <select
-                className="select"
-                value={fromAccount}
-                onChange={(e) => setFromAccount(e.target.value)}
-              >
-                {accounts.map((a) => (
-                  <option key={a.accountNumber} value={a.accountNumber}>
-                    {a.accountNumber}
-                  </option>
-                ))}
-              </select>
+              <label className="form__label">Amount</label>
+              <input
+                className="input"
+                type="number"
+                placeholder="Amount"
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+              />
             </div>
 
             <div className="form__row">
-              <label className="form__label">Amount</label>
-              <input className="input" type="number" placeholder="Amount" value={amount} onChange={(e)=>setAmount(e.target.value)} />
-            </div>
-            <div className="form__row">
               <label className="form__label">Term (months)</label>
-              <input className="input" type="number" placeholder="Term (months)" value={term} onChange={(e)=>setTerm(e.target.value)} />
+              <input
+                className="input"
+                type="number"
+                placeholder="Term (months)"
+                value={term}
+                onChange={(e) => setTerm(e.target.value)}
+              />
             </div>
+
             <div className="form__row">
               <label className="form__label">Annual rate</label>
               <div className="badge">Fixed {FIXED_RATE}%</div>
             </div>
+
             <div className="form__actions">
-              <button className="btn btn--primary" type="submit">Request</button>
+              <button className="btn btn--primary" type="submit">
+                Request
+              </button>
             </div>
           </form>
 
           <form className="form form--card">
             <h3>Repay loan</h3>
-            <p className="form__hint">Repayment feature not implemented on server yet.</p>
+            <p className="form__hint">
+              Repayment feature not implemented on server yet.
+            </p>
           </form>
         </section>
 
