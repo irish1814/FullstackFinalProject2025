@@ -1,7 +1,6 @@
 import jwt from 'jsonwebtoken';
+import { JWT_SECRET, JWT_EXPIRES_IN } from "../config/env.js";
 
-const JWT_SECRET = process.env.JWT_SECRET || "supersecretbankkey";
-const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || "1h";
 
 /**
  * Generates a signed JSON Web Token (JWT) for authentication.

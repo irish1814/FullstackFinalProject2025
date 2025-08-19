@@ -18,7 +18,6 @@ const savingsSchema = new mongoose.Schema({
 // Subdocument schema for multiple loans
 const loanSchema = new mongoose.Schema({
     name: { type: String, required: true },            // e.g., "Car Loan"
-    principal: { type: Number, required: true },
     remainingBalance: { type: Number, required: true },
     interestRate: { type: Number, default: 0 },
     monthlyPayment: { type: Number },

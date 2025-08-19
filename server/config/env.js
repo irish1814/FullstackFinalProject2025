@@ -16,6 +16,7 @@ export const {
     NODE_ENV = env,
     DB_URL,
     JWT_SECRET,
+    JWT_EXPIRES_IN,
     ADMIN_SECRET_KEY
 } = process.env;
 

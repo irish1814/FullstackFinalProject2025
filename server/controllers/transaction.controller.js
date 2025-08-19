@@ -75,7 +75,6 @@ export const createTransaction = async (req, res, next) => {
             case "loan":
                 senderAccount.loans.push({
                     name: loanPayload?.name || "New Loan",
-                    principal: loanPayload?.description || "New Loan",
                     remainingBalance: transactionAmount,
                     interestRate: loanPayload?.interestRate || 0.1,
                     monthlyPayment: loanPayload?.monthlyPayment || transactionAmount / 12,
