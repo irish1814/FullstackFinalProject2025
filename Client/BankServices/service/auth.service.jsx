@@ -1,42 +1,43 @@
 import { http } from "../http";
 
 export const AuthService = {
-  login(email, password) {
-    return http("/auth/login", { method: "POST", data: { email, password } })
-      .then(res => res?.data);   
+  async login(email, password) {
+    const res = await http("/auth/login", { method: "POST", data: { email, password } });
+    return res?.data ?? null;  
   },
 
-  verify2fa(code, userId) {
-    return http("/auth/loginWithMFA", {
+  async verify2fa(code, userId) {
+    const res = await http("/auth/loginWithMFA", {
       method: "POST",
       data: { id: userId, twoFactorToken: code },
-    }).then((res) => {
-      const token = res?.data.jwtToken;
-      return { token, user: res?.data.user, account: res?.data.account };
     });
+    return res?.data ?? null;  
   },
 
-  me(token) {
-    return http("/auth/me", { token });
+  async me(token) {
+    return http("/auth/me", { token }).then(res => res?.data ?? null);
   },
 
-  signup(payload) {
-    return http("/auth/register", { method: "POST", data: payload });
+  async signup(payload) {
+    const res = await http("/auth/register", { method: "POST", data: payload });
+    return res?.data ?? null;  
   },
 
-  adminGate(entryCode) {
-    return http("/auth/admin-gate", { method: "POST", data: { entryCode } });
+  async adminGate(entryCode) {
+    const res = await http("/auth/admin-gate", { method: "POST", data: { adminKey: entryCode, role: "admin" } });
+    return res?.data ?? null;  
   },
 
-  toggle2FA(userId) {
-    return http("/auth/toggle-2fa", {
+  async toggle2FA(userId) {
+    const res = await http("/auth/toggle-2fa", {
       method: "POST",
-      data: { userId }
-    }).then(res => res?.data);
+      data: { id: userId }
+    });
+    return res?.data ?? null;
   },
 
-  getProfile() {
-    return http("/auth/me", { method: "GET" })
-      .then(res => res?.data);
+  async getProfile() {
+    const res = await http("/auth/me", { method: "GET" });
+    return res?.data ?? null;
   },
 };

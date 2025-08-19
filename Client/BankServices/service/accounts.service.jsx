@@ -3,7 +3,7 @@ import { http } from '../http.jsx';
 export const AccountsService = {
   async getAccounts() {
     const res = await http('/accounts');
-    return res?.data ?? [];
+    return res?.data?.data ?? []; 
   },
 
   async getAccountById(id) {

@@ -32,18 +32,12 @@ export default function Dashboard() {
       try {
         setLoading(true);
 
-        const accs = isAdmin
-          ? await api("/accounts/all")
-          : await api("/accounts/my"); 
-
-       
-        const txs = isAdmin
-          ? await api("/transactions/all")
-          : await api("/transactions/my");
+        const accRes = await api("/accounts");
+        const txRes = await api("/transactions");
 
         if (!alive) return;
-        setAccounts(Array.isArray(accs) ? accs : []);
-        setTransactions(Array.isArray(txs) ? txs : []);
+        setAccounts(Array.isArray(accRes?.data) ? accRes.data : []);
+        setTransactions(Array.isArray(txRes) ? txRes : txRes?.data ?? []);
       } catch (e) {
         if (!alive) return;
         setErr(e.message || "Failed to load dashboard data");
@@ -121,25 +115,13 @@ export default function Dashboard() {
             <h3>{isAdmin ? "System Summary" : "Account Summary"}</h3>
             {isAdmin ? (
               <div className="mt-2">
-                <p>
-                  <strong>Accounts:</strong> {totals.accountsCount}
-                </p>
-                <p>
-                  <strong>Total Balance:</strong>{" "}
-                  {totals.balanceTotal.toLocaleString()} ₪
-                </p>
-                <p className="text-muted" style={{ fontSize: 13 }}>
-                </p>
+                <p><strong>Accounts:</strong> {totals.accountsCount}</p>
+                <p><strong>Total Balance:</strong> {totals.balanceTotal.toLocaleString()} ₪</p>
               </div>
             ) : primaryAccount ? (
               <div className="mt-2">
                 <p>Type: {primaryAccount.accountType}</p>
-                <p>
-                  Status:{" "}
-                  <span className="badge badge--ok">
-                    {primaryAccount.status || "active"}
-                  </span>
-                </p>
+                <p>Status: <span className="badge badge--ok">{primaryAccount.status || "active"}</span></p>
               </div>
             ) : (
               <div className="mt-2">No account selected.</div>
@@ -153,8 +135,6 @@ export default function Dashboard() {
               <button className="btn">Deposit</button>
               <button className="btn btn--ghost">Loans</button>
             </div>
-            <p className="text-muted" style={{ fontSize: 12, marginTop: 8 }}>
-            </p>
           </div>
         </div>
 
@@ -186,8 +166,7 @@ export default function Dashboard() {
                         <span
                           style={{
                             fontWeight: 700,
-                            color:
-                              Number(tx.amount) < 0 ? "#ff5d73" : "rgb(37, 211, 102)",
+                            color: Number(tx.amount) < 0 ? "#ff5d73" : "rgb(37, 211, 102)",
                           }}
                         >
                           {Number(tx.amount) < 0 ? "" : "+"}
@@ -215,7 +194,6 @@ export default function Dashboard() {
             </div>
           )}
         </div>
-
       </div>
     </div>
   );

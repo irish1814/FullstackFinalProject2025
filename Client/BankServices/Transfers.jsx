@@ -28,7 +28,7 @@ export default function Transfers() {
   }
 
   try {
-    await TransactionsService.transfer({
+    await TransactionsService.create({
       accountNumberSender: fromId,           
       accountNumberReceiver: toAccountNumber,
       typeOfTransaction: "transfer",         
@@ -57,12 +57,13 @@ export default function Transfers() {
         <div className="form__row">
           <label className="form__label">From account</label>
           <select className="select" value={fromId} onChange={(e) => setFromId(e.target.value)}>
-            {accounts.map((a) => (
-              <option key={a.id || a._id} value={a.id || a._id}>
-                {a.accountNumber}
-              </option>
-            ))}
-          </select>
+              {accounts.map((a) => (
+                <option key={a.accountNumber} value={a.accountNumber}>
+                  {a.accountNumber}
+                </option>
+              ))}
+            </select>
+
         </div>
 
         <div className="form__row">

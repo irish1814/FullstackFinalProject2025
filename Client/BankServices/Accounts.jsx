@@ -40,7 +40,7 @@ export default function Accounts() {
     (async () => {
       try {
         setLoadingUsers(true);
-        const data = await api("/users/all"); 
+        const data = await api("/users");
         if (alive) setUsers(data);
       } catch (e) {
         setErr(e.message || "Failed to load users");
@@ -52,7 +52,7 @@ export default function Accounts() {
     (async () => {
       try {
         setLoadingAccs(true);
-        const data = await api("/accounts/all");
+        const data = await api("/accounts");
         if (alive) setAccounts(data);
       } catch (e) {
         setErr(prev => prev || e.message || "Failed to load accounts");
@@ -82,7 +82,7 @@ export default function Accounts() {
       (a.accountType || "").toLowerCase().includes(s) ||
       (a.currency || "").toLowerCase().includes(s) ||
       (a.status || "").toLowerCase().includes(s) ||
-      (a.userEmail || "").toLowerCase().includes(s) || // אם השרת מחזיר
+      (a.userEmail || "").toLowerCase().includes(s) ||
       (a.userId || "").toLowerCase().includes(s)
     );
   }, [qAcc, accounts]);
@@ -198,7 +198,6 @@ export default function Accounts() {
           )}
         </div>
 
-        {/* ACCOUNTS */}
         <div className="toolbar mt-3">
           <h2>Accounts</h2>
           <input
@@ -245,11 +244,6 @@ export default function Accounts() {
               </table>
             </div>
           )}
-        </div>
-
-        <div className="mt-2 text-muted" style={{ fontSize: 12 }}>
-          Notes: Admin-only. Supports deleting users, deleting accounts, and changing account status to <code>frozen</code>/<code>closed</code>.  
-          אם בצד שרת שמות הנתיבים שונים, עדכן את הנתיבים ב־<code>api()</code> הקריאות למעלה.
         </div>
       </div>
     </div>
