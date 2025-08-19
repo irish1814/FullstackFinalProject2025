@@ -1,16 +1,16 @@
 import React, { useEffect, useState } from "react";
-import { AccountsService } from "./service/accounts.service";
 import { TransactionsService } from "./service/transactions.service";
+import { AccountsService } from "./service/accounts.service"; // ✅ לוודא שקיים
 
 export default function Savings() {
   const [plans, setPlans] = useState([]);
-  const [accounts, setAccounts] = useState([]);
-  const [fromAccount, setFromAccount] = useState("");
   const [name, setName] = useState("");
   const [monthlyAmount, setMonthlyAmount] = useState("");
   const [term, setTerm] = useState("");
   const [status, setStatus] = useState("");
+  const [fromAccount, setFromAccount] = useState(null); // ✅ שמירת מספר החשבון
 
+  // קביעת ריבית אוטומטית לפי סכום
   const getRateByAmount = (amt) => {
     const a = Number(amt || 0);
     if (a > 20000) return 4;
@@ -18,19 +18,34 @@ export default function Savings() {
     return 3;
   };
 
+  // טעינת כל התכניות הקיימות (מתוך ה־transactions)
   const reload = async () => {
-    setPlans([]);
+    try {
+      const allTx = await TransactionsService.list();
+      const savings = allTx.filter((tx) => tx.typeOfTransaction === "saving");
+      setPlans(savings);
+    } catch (err) {
+      setStatus(err.message || "Failed to load saving plans.");
+    }
   };
 
   useEffect(() => {
-    (async () => {
-      const accs = await AccountsService.getAccounts();
-      setAccounts(accs);
-      if (accs[0]) setFromAccount(accs[0].accountNumber);
-    })();
+    const loadAccount = async () => {
+      try {
+        const accounts = await AccountsService.getAccounts();
+        if (accounts && accounts.length > 0) {
+          setFromAccount(accounts[0].accountNumber); // ✅ נשתמש בחשבון הראשון
+        }
+      } catch {
+        setStatus("Failed to load account.");
+      }
+    };
+
+    loadAccount();
     reload();
   }, []);
 
+  // חישוב ערך עתידי
   const futureValue = (p, annualRate, months) => {
     const r = Number(annualRate || 0) / 12 / 100;
     const n = Number(months || 0);
@@ -49,22 +64,22 @@ export default function Savings() {
     const months = Number(term);
     const autoRate = getRateByAmount(monthly);
 
-    if (!fromAccount || !name || !monthly || !months) {
+    if (!name || !monthly || !months || !fromAccount) {
       setStatus("Please fill all fields.");
       return;
     }
 
     try {
       await TransactionsService.create({
-        accountNumberSender: fromAccount,
         typeOfTransaction: "saving",
+        accountNumberSender: fromAccount, // ✅ עכשיו מוגדר
         transactionAmount: monthly,
         savingPayload: {
           name,
           targetAmount: monthly * months,
           interestRate: autoRate,
-          termMonths: months
-        }
+          termMonths: months,
+        },
       });
 
       setName("");
@@ -89,20 +104,33 @@ export default function Savings() {
               <div>No saving plans yet.</div>
             ) : (
               plans.map((p) => {
-                const planRate = (p.annualRate ?? getRateByAmount(p.monthlyAmount));
+                const s = p.savingPayload || {};
+                const planRate =
+                  s.interestRate ?? getRateByAmount(p.transactionAmount);
                 return (
-                  <div className="list-item" key={p.id}>
+                  <div className="list-item" key={p._id}>
                     <div className="flex justify-between items-center">
-                      <strong>{p.name}</strong>
-                      <span className={`badge ${p.status === 'active' ? 'badge--ok' : 'badge--warn'}`}>
+                      <strong>{s.name}</strong>
+                      <span
+                        className={`badge ${
+                          p.status === "active" ? "badge--ok" : "badge--warn"
+                        }`}
+                      >
                         {p.status}
                       </span>
                     </div>
-                    <div>Monthly: ₪{p.monthlyAmount}</div>
-                    <div>Term: {p.termMonths} months</div>
+                    <div>Monthly: ₪{p.transactionAmount}</div>
+                    <div>Term: {s.termMonths} months</div>
                     <div>Annual rate: {planRate}%</div>
-                    <div>Projected FV (calc): ₪{futureValue(p.monthlyAmount, planRate, p.termMonths)}</div>
-                    <div>Balance: ₪{p.balance ?? 0}</div>
+                    <div>
+                      Projected FV (calc): ₪
+                      {futureValue(
+                        p.transactionAmount,
+                        planRate,
+                        s.termMonths
+                      )}
+                    </div>
+                    <div>Balance: ₪{s.balance ?? 0}</div>
                   </div>
                 );
               })
@@ -110,24 +138,10 @@ export default function Savings() {
           </div>
         </section>
 
+        {/* פתיחת תכנית חדשה */}
         <section className="grid cols-2 gap-2 mt-2">
           <form className="form form--card" onSubmit={onOpen}>
             <h3>Open new plan</h3>
-
-            <div className="form__row">
-              <label className="form__label">From account</label>
-              <select
-                className="select"
-                value={fromAccount}
-                onChange={(e) => setFromAccount(e.target.value)}
-              >
-                {accounts.map((a) => (
-                  <option key={a.accountNumber} value={a.accountNumber}>
-                    {a.accountNumber}
-                  </option>
-                ))}
-              </select>
-            </div>
 
             <div className="form__row">
               <label className="form__label">Name</label>
@@ -161,11 +175,15 @@ export default function Savings() {
 
             <div className="form__row">
               <label className="form__label">Annual rate</label>
-              <div className="badge">Auto: {getRateByAmount(Number(monthlyAmount))}%</div>
+              <div className="badge">
+                Auto: {getRateByAmount(Number(monthlyAmount))}%
+              </div>
             </div>
 
             <div className="form__actions">
-              <button className="btn btn--primary" type="submit">Open</button>
+              <button className="btn btn--primary" type="submit">
+                Open
+              </button>
             </div>
           </form>
         </section>

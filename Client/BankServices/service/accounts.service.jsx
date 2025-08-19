@@ -1,12 +1,13 @@
 import { http } from '../http.jsx';
 
 export const AccountsService = {
-  async getAccounts() {
-    const res = await http('/accounts');
-    return res?.data?.data ?? []; 
+  async getMyAccount() {
+    const res = await http('/accounts/me');
+    return res?.data?.data ?? null; 
   },
 
   async getAccountById(id) {
-    return await http(`/accounts/${id}`);
+    const res = await http(`/accounts/${id}`);
+    return res?.data?.data ?? null;
   }
 };

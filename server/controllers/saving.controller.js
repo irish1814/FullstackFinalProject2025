@@ -1,4 +1,4 @@
-const { AccountModel } = require("../models/Account.model");
+import  AccountModel from "../models/Account.model.js";
 
 export const getSavingsByAccountNumber = async (req, res, next) => {
     try {
