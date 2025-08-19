@@ -32,7 +32,6 @@ export default function Dashboard() {
       try {
         setLoading(true);
 
-        // 1) חשבונות
         const accs = isAdmin
           ? await api("/accounts/all")
           : await api("/accounts/my"); 
@@ -130,7 +129,6 @@ export default function Dashboard() {
                   {totals.balanceTotal.toLocaleString()} ₪
                 </p>
                 <p className="text-muted" style={{ fontSize: 13 }}>
-                  Tip: פעולות אדמין (מחיקה/הקפאה/סגירה) נמצאות בעמוד Accounts.
                 </p>
               </div>
             ) : primaryAccount ? (
@@ -156,7 +154,6 @@ export default function Dashboard() {
               <button className="btn btn--ghost">Loans</button>
             </div>
             <p className="text-muted" style={{ fontSize: 12, marginTop: 8 }}>
-              Transactions page הוסר—תקציר תנועות מופיע למטה.
             </p>
           </div>
         </div>

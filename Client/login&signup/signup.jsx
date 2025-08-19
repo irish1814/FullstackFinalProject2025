@@ -5,17 +5,17 @@ import "../css/index.css";
 export default function Signup() {
   const nav = useNavigate();
 
-  // סטייט יחיד לכל השדות
   const [form, setForm] = useState({
     name: "",
     email: "",
     password: "",
-    confirm: ""
+    confirm: "",
+    adminCode: ""
   });
 
   const [err, setErr] = useState("");
   const [loading, setLoading] = useState(false);
-  const [show, setShow] = useState(false); // הצגת/הסתרת סיסמאות
+  const [show, setShow] = useState(false);
 
   function onChange(e) {
     const { name, value } = e.target;
@@ -26,7 +26,6 @@ export default function Signup() {
     e.preventDefault();
     setErr("");
 
-    // ולידציה בסיסית
     if (!form.email || !form.password || !form.confirm) {
       setErr("נא למלא אימייל, סיסמה ואימות סיסמה");
       return;
@@ -40,10 +39,15 @@ export default function Signup() {
       return;
     }
 
-    // מעבר לשלב פרטי הפרופיל – מעבירים state
     setLoading(true);
+
     nav("/signup/profileDetails", {
-      state: { email: form.email.trim(), password: form.password, name: form.name.trim() }
+      state: {
+        name: form.name.trim(),
+        email: form.email.trim(),
+        password: form.password,
+        adminCode: form.adminCode.trim() || null
+      }
     });
   }
 
@@ -81,6 +85,19 @@ export default function Signup() {
           </div>
 
           <div className="form__row">
+            <label className="form__label" htmlFor="adminCode">Admin Code (optional)</label>
+            <input
+              id="adminCode"
+              name="adminCode"
+              className="input"
+              type="password"
+              value={form.adminCode}
+              onChange={onChange}
+              placeholder="Enter code if you have one"
+            />
+          </div>
+
+          <div className="form__row">
             <label className="form__label" htmlFor="password">Password</label>
             <div className="flex gap-1">
               <input
@@ -92,11 +109,15 @@ export default function Signup() {
                 onChange={onChange}
                 required
               />
-              <button type="button" className="btn" onClick={() => setShow(s => !s)}>
+              <button
+                type="button"
+                className="btn"
+                onClick={() => setShow(s => !s)}
+              >
                 {show ? "Hide" : "Show"}
               </button>
             </div>
-            <span className="form__hint">At least 8 chars. Use letters &amp; numbers.</span>
+            <span className="form__hint">At least 8 chars & numbers.</span>
           </div>
 
           <div className="form__row">

@@ -14,34 +14,37 @@ export default function Transfers() {
     (async () => {
       const accs = await AccountsService.getAccounts();
       setAccounts(accs);
-      if (accs[0]) setFromId(accs[0].id || accs[0]._id);
+      if (accs[0]) setFromId(accs[0].accountNumber);
     })();
   }, []);
 
   const onSubmit = async (e) => {
-    e.preventDefault();
-    setStatus("");
-    const val = Number(amount);
-    if (!fromId || !toAccountNumber || !val || val <= 0) {
-      setStatus("Please fill all fields correctly.");
-      return;
-    }
+  e.preventDefault();
+  setStatus("");
+  const val = Number(amount);
+  if (!fromId || !toAccountNumber || !val || val <= 0) {
+    setStatus("Please fill all fields correctly.");
+    return;
+  }
 
-    try {
-      await TransactionsService.transfer({
-        fromAccountId: fromId,
-        toAccountNumber,
-        amount: val,
-        note: note || "Manual transfer"
-      });
-      setStatus("Transfer recorded (local demo).");
-      setAmount("");
-      setNote("");
-      setToAccountNumber("");
-    } catch (e) {
-      setStatus(e.message || "Transfer failed");
-    }
-  };
+  try {
+    await TransactionsService.transfer({
+      accountNumberSender: fromId,           
+      accountNumberReceiver: toAccountNumber,
+      typeOfTransaction: "transfer",         
+      description: note || "Manual transfer",
+      transactionAmount: val
+    });
+
+    setStatus("Transfer recorded successfully.");
+    setAmount("");
+    setNote("");
+    setToAccountNumber("");
+  } catch (e) {
+    setStatus(e.message || "Transfer failed");
+  }
+};
+
 
   if (!accounts.length) return <div>Loading accounts...</div>;
 
