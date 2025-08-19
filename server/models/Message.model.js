@@ -6,6 +6,10 @@ const messageSchema = new mongoose.Schema({
         ref: "UserModel", // reference to your user
         required: true
     },
+    senderAccountNumber: {
+        type: Number,
+        required: true
+    },
     content: {
         type: String,
         required: "Message cannot be empty"

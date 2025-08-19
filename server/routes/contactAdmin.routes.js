@@ -10,6 +10,6 @@ contactRouter.get("/:id", authenticateJWTOfAdmin, getMessageById);
 contactRouter.put("/:id", authenticateJWTOfAdmin, updateMessage);
 
 // ✅ Protected
-contactRouter.post("/contactAdmin", authenticateJWT, createMessage);
+contactRouter.post("/create", authenticateJWT, createMessage);
 
 export default contactRouter;
