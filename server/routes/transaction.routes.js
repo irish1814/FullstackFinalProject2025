@@ -1,5 +1,7 @@
 import { Router } from 'express';
-import {createTransaction, deleteTransactions, getAllTransactions, getTransactionById, getTransactionsByAccount}
+import {
+    createTransaction, deleteTransactions, getAllTransactions, getTransactionById, getTransactionsByAccountNumber
+}
     from '../controllers/transaction.controller.js';
 import { authenticateJWT, authenticateJWTOfAdmin } from '../middleware/authenticate.middleware.js';
 
@@ -13,6 +15,6 @@ transactionRoutes.delete('/all', authenticateJWTOfAdmin, deleteTransactions);
 // ✅ Protected Routes
 transactionRoutes.post('/create', authenticateJWT, createTransaction);
 transactionRoutes.get('/:id', authenticateJWT, getTransactionById);
-transactionRoutes.get('/account/:id', authenticateJWT, getTransactionsByAccount);
+transactionRoutes.get('/account/:id', authenticateJWT, getTransactionsByAccountNumber);
 
 export default transactionRoutes;

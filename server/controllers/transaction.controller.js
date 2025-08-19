@@ -226,11 +226,16 @@ export const getTransactionById = async (req, res, next) => {
 };
 
 // Get all transactions for a given account
-export const getTransactionsByAccount = async (req, res, next) => {
+export const getTransactionsByAccountNumber = async (req, res, next) => {
     try {
-        const { accountId } = req.params;
-        const transactions = await TransactionModel.find({ accountId }).sort({ transactionTime: -1 });
-        res.status(200).json(transactions);
+        const { id } = req.params;
+        const transactions = await TransactionModel.find({ accountNumber: id }).sort({ transactionTime: -1 });
+        res.status(200).send({
+            success: true,
+            data: {
+                transactions: transactions,
+            }
+        });
     } catch (err) {
         next(err);
     }

@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import {authenticateJWT, authenticateJWTOfAdmin} from '../middleware/authenticate.middleware.js';
-import {deleteAccount, getAccount, getAccounts, updateAccount} from '../controllers/account.controller.js';
+import {deleteAccount, getAccountByAccountNumber, getAccounts, updateAccount} from '../controllers/account.controller.js';
 import {errorMiddleware} from "../middleware/errorHandling.middleware.js";
 
 const accountRoutes = Router();
@@ -18,7 +18,7 @@ accountRoutes.put('/:id', authenticateJWTOfAdmin, updateAccount);
 accountRoutes.delete('/:id', authenticateJWTOfAdmin, deleteAccount);
 
 // ✅ Protected
-accountRoutes.get('/:id', authenticateJWT, getAccount);
+accountRoutes.get('/:id', authenticateJWT, getAccountByAccountNumber);
 
 
 export default accountRoutes;

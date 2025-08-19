@@ -33,12 +33,15 @@ export default function Dashboard() {
         setLoading(true);
 
         const accountNumber = localStorage.getItem("accountNumber");
-        const accRes = await api(`/accounts/${accountNumber}`);
-        const txRes = await api(`/transactions/${accountNumber}`);
+
+          const accRes = await api(`/accounts/${accountNumber}`);
+        const txRes = await api(`/transactions/account/${accountNumber}`);
+          console.log(accRes)
+          console.log(txRes)
 
         if (!alive) return;
-        setAccounts(Array.isArray(accRes?.data) ? accRes.data : []);
-        setTransactions(Array.isArray(txRes) ? txRes : txRes?.data ?? []);
+        setAccounts(Array.isArray(accRes?.data) ? accRes.data.account : []);
+        setTransactions(Array.isArray(txRes) ? txRes : txRes?.data.transactions ?? []);
       } catch (e) {
         if (!alive) return;
         setErr(e.message || "Failed to load dashboard data");

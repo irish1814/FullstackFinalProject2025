@@ -12,21 +12,27 @@ export const getAccounts = async (req, res, next) => {
     }
 }
 
-export const getAccount = async (req, res, next) => {
-  try {
-    const { id } = req.params;          
-    const account = await AccountModel.findById(id).select('-userId');
-    if (!account) {
-      const error = new Error("Account not found for this user");
-      error.statusCode = 404;
-      throw error;
+export const getAccountByAccountNumber = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+
+        const account = await AccountModel.findOne({ accountNumber: id });
+
+        if (!account) {
+            const error = new Error("Account not found for this user");
+            error.statusCode = 404;
+            throw error;
+        }
+
+        return res.status(200).send({
+            success: true,
+            data: { account }
+        });
+    } catch (err) {
+        next(err);
     }
-   
-    return res.status(200).json(account);
-  } catch (err) {
-    next(err);
-  }
 };
+
 
 export const updateAccount = async (req, res, next) => {
     try {

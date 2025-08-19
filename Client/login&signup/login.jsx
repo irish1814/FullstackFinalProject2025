@@ -39,11 +39,12 @@ export default function Login() {
         return; 
       }
 
-      const { token, user } = res || {};
-      if (!token) throw new Error("חסרים נתוני התחברות");
-      localStorage.setItem("token", token);
-      if (user?.email) localStorage.setItem("email", user.email);
-      if (user?.role) localStorage.setItem("role", user.role);
+        const { token, user , account} = res;
+        if (!token) throw new Error("חסרים נתוני התחברות");
+        localStorage.setItem("token", token);
+        if (user?.email) localStorage.setItem("email", user.email);
+        if (user?.role) localStorage.setItem("role", user.role);
+        if (account?.accountNumber) localStorage.setItem("accountNumber", account.accountNumber);
       nav("/dashboard");
     } catch (e2) {
       setErr(e2?.message || "שגיאת התחברות");
@@ -65,7 +66,7 @@ export default function Login() {
       localStorage.setItem("token", jwtToken);
       if (user?.email) localStorage.setItem("email", user.email);
       if (user?.role) localStorage.setItem("role", user.role);
-      if (account?.number) localStorage.setItem("accountNumber", account.number);
+      if (account?.accountNumber) localStorage.setItem("accountNumber", account.accountNumber);
       setTwoFA({ required: false, tempToken: "", code: "", verifying: false, error: "" });
       nav("/dashboard");
     } catch (e2) {
