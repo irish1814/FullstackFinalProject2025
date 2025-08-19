@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { authenticateJWT, authenticateJWTOfAdmin } from "../middleware/authenticate.middleware.js";
-import {createMessage, getMessageById, getMessages, updateMessage} from "../controllers/contactAdmin.controller.js";
+import {createMessage, getMessageById, getMessages, updateMessage} from "../controllers/contact.controller.js";
 
 const contactRouter = new Router();
 

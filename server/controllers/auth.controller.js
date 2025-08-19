@@ -179,7 +179,9 @@ export const loginWithMFA = async (req, res, next) => {
         res.status(200).json({
             success: true,
             message: 'User signed in successfully',
-            data: { jwtToken, user, account }
+            data: {
+                jwtToken, user, account
+            }
         });
     } catch (error) {
         next(error);

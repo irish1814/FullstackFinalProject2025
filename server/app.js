@@ -6,7 +6,7 @@ import authRoutes from './routes/auth.routes.js';
 import userRoutes from "./routes/user.routes.js";
 import accountRoutes from "./routes/account.routes.js";
 import transactionRoutes from "./routes/transaction.routes.js";
-import contactRoutes from "./routes/contactAdmin.routes.js";
+import contactRoutes from "./routes/contact.routes.js";
 import exchangeRoutes from "./routes/currencyExchange.routes.js";
 import { PORT } from "./config/env.js";
 import 'dotenv/config';

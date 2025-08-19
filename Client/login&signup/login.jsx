@@ -60,11 +60,12 @@ export default function Login() {
     }
     setTwoFA(s => ({ ...s, verifying: true, error: "" }));
     try {
-      const { token, user } = await AuthService.verify2fa(twoFA.code, twoFA.tempToken);
-      if (!token) throw new Error("אימות דו-שלבי נכשל");
-      localStorage.setItem("token", token);
+      const { jwtToken, user , account} = await AuthService.verify2fa(twoFA.code, twoFA.tempToken);
+      if (!jwtToken) throw new Error("אימות דו-שלבי נכשל");
+      localStorage.setItem("token", jwtToken);
       if (user?.email) localStorage.setItem("email", user.email);
       if (user?.role) localStorage.setItem("role", user.role);
+      if (account?.number) localStorage.setItem("accountNumber", account.number);
       setTwoFA({ required: false, tempToken: "", code: "", verifying: false, error: "" });
       nav("/dashboard");
     } catch (e2) {

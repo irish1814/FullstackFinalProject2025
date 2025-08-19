@@ -32,8 +32,9 @@ export default function Dashboard() {
       try {
         setLoading(true);
 
-        const accRes = await api("/accounts");
-        const txRes = await api("/transactions");
+        const accountNumber = localStorage.getItem("accountNumber");
+        const accRes = await api(`/accounts/${accountNumber}`);
+        const txRes = await api(`/transactions/${accountNumber}`);
 
         if (!alive) return;
         setAccounts(Array.isArray(accRes?.data) ? accRes.data : []);
