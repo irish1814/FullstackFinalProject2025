@@ -186,7 +186,7 @@ export const loginWithMFA = async (req, res, next) => {
     }
 };
 
-export const GenerateMFA = async (req, res, next) => {
+export const toggleMFA = async (req, res, next) => {
     try {
         const { id, disable } = req.body;
 

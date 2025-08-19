@@ -11,8 +11,8 @@ export const AuthService = {
       method: "POST",
       data: { id: userId, twoFactorToken: code },
     }).then((res) => {
-      const token = res?.jwtToken || res?.token;
-      return { token, user: res?.user, account: res?.account };
+      const token = res?.data.jwtToken;
+      return { token, user: res?.data.user, account: res?.data.account };
     });
   },
 
