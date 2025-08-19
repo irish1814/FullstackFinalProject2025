@@ -6,6 +6,7 @@ import authRoutes from './routes/auth.routes.js';
 import userRoutes from "./routes/user.routes.js";
 import accountRoutes from "./routes/account.routes.js";
 import transactionRoutes from "./routes/transaction.routes.js";
+import contactRoutes from "./routes/contactAdmin.routes.js";
 import exchangeRoutes from "./routes/currencyExchange.routes.js";
 import { PORT } from "./config/env.js";
 import 'dotenv/config';
@@ -32,6 +33,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/accounts', accountRoutes);
 app.use('/api/transactions', transactionRoutes);
+app.use('/api/contacts', contactRoutes);
 app.use('/api/exchanges', exchangeRoutes);
 
 app.use(errorMiddleware);
