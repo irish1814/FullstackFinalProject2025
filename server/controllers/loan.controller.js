@@ -1,5 +1,27 @@
-// loansController.js
 const { AccountModel } = require("../models/Account.model");
+
+
+export const getLoansByAccountNumber = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const account = await AccountModel.findOne( { accountNumber: id });
+        if (!account) {
+            const error = new Error("Account not found");
+            error.status = 404;
+            throw error;
+        }
+
+        res.status(200).send( {
+            success: true,
+            data: {
+                loans: account.loans,
+            }
+        });
+
+    } catch (error) {
+        next(error);
+    }
+}
 
 // Update all loans for a given user
 const updateLoansMonthly = async (userId) => {

@@ -1,6 +1,12 @@
 import { Router } from 'express';
 import {authenticateJWT, authenticateJWTOfAdmin} from '../middleware/authenticate.middleware.js';
-import {deleteAccount, getAccountByAccountNumber, getAccounts, updateAccount} from '../controllers/account.controller.js';
+import {
+    getAccountByAccountNumber,
+    getAccounts,
+    toggleAccount,
+    updateAccount,
+    deleteAccount
+} from '../controllers/account.controller.js';
 import {errorMiddleware} from "../middleware/errorHandling.middleware.js";
 
 const accountRoutes = Router();
@@ -14,6 +20,7 @@ accountRoutes.get('/bank-info', (req, res) => {
 
 // ✅ Protected - for admins only!
 accountRoutes.get('/all', authenticateJWTOfAdmin, getAccounts);
+accountRoutes.put('/toggleAccount/:id', authenticateJWTOfAdmin, toggleAccount);
 accountRoutes.put('/:id', authenticateJWTOfAdmin, updateAccount);
 accountRoutes.delete('/:id', authenticateJWTOfAdmin, deleteAccount);
 

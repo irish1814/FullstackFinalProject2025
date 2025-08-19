@@ -6,6 +6,8 @@ import authRoutes from './routes/auth.routes.js';
 import userRoutes from "./routes/user.routes.js";
 import accountRoutes from "./routes/account.routes.js";
 import transactionRoutes from "./routes/transaction.routes.js";
+import loansRoutes from "./routes/loan.routes.js";
+import savingsRoutes from "./routes/saving.routes.js";
 import contactRoutes from "./routes/contact.routes.js";
 import exchangeRoutes from "./routes/currencyExchange.routes.js";
 import { PORT } from "./config/env.js";
@@ -33,6 +35,8 @@ app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/accounts', accountRoutes);
 app.use('/api/transactions', transactionRoutes);
+app.use('/api/savings', savingsRoutes);
+app.use('/api/loans', loansRoutes);
 app.use('/api/contacts', contactRoutes);
 app.use('/api/exchanges', exchangeRoutes);
 

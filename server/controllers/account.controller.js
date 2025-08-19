@@ -33,6 +33,26 @@ export const getAccountByAccountNumber = async (req, res, next) => {
     }
 };
 
+export const toggleAccount = async (req, res, next) => {
+    try {
+        const accountNumber = req.params.id;
+        const newStatus = req.body.status;
+
+        await AccountModel.findByIdAndUpdate(
+            { accountNumber: accountNumber },
+            { status: newStatus },
+        );
+
+        AccountModel.save();
+
+        res.status(200).send({
+            success: true,
+            data: { accountStatus: newStatus }
+        })
+    } catch (error) {
+        next(error);
+    }
+}
 
 export const updateAccount = async (req, res, next) => {
     try {

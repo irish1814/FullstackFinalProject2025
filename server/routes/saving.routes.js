@@ -1,9 +1,9 @@
 import { Router } from 'express';
 import { authenticateJWT } from "../middleware/authenticate.middleware.js";
-import { getLoansByAccountNumber } from '../controllers/loan.controller.js';
+import { getSavingsByAccountNumber } from '../controllers/saving.controller.js';
 
 const savingRoutes = Router();
 
-savingRoutes.get('/:id', authenticateJWT, getLoansByAccountNumber);
+savingRoutes.get('/:id', authenticateJWT, getSavingsByAccountNumber);
 
 export default savingRoutes;

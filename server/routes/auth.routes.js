@@ -7,7 +7,7 @@ import {
     toggleMFA,
     loginWithMFA,
 } from '../controllers/auth.controller.js';
-import {authenticateJWT, authenticateJWTOfAdmin } from "../middleware/authenticate.middleware.js";
+import { authenticateJWT, authenticateJWTOfAdmin } from "../middleware/authenticate.middleware.js";
 
 const authRoutes = Router();
 

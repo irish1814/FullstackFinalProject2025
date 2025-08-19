@@ -17,6 +17,12 @@ export const createTransaction = async (req, res, next) => {
 
         const senderAccount = await AccountModel.findOne( { accountNumber: accountNumberSender } );
 
+        if(senderAccount.status === "frozen" || senderAccount.status === "closed") {
+            const error = new Error("Your account is disabled, please contact admin");
+            error.statusCode = 400;
+            throw error;
+        }
+
         // Ensure the sender & receiver account exists
         if (!senderAccount) {
             const error = new Error("Sender Account not found");
@@ -82,7 +88,7 @@ export const createTransaction = async (req, res, next) => {
                     dueDate: loanPayload?.dueDate || new Date(new Date().setMonth(new Date().getMonth() + 12))
                 });
                 senderAccount.balance += transactionAmount;
-                description = `${accountNumberSender} asks for a loan of ${transactionAmount} for ${loanPayload?.monthlyPayment} months`;
+                description = `${accountNumberSender} asks for a loan of ${transactionAmount} for ${loanPayload?.termMonths} months`;
                 break;
 
             case "saving":
