@@ -1,10 +1,12 @@
 import TransactionModel from "../models/Transaction.model.js";
 import AccountModel from "../models/Account.model.js";
+import axios from "axios";
 
 // Create a new transaction
 export const createTransaction = async (req, res, next) => {
     try {
-        const { accountNumberSender, accountNumberReceiver, typeOfTransaction, description, transactionAmount, extra } = req.body;
+        const { accountNumberSender, accountNumberReceiver, typeOfTransaction, transactionAmount,
+            loanPayload, savingPayload, exchangePayload } = req.body;
 
         // Basic validation
         if (!accountNumberSender || !typeOfTransaction || !transactionAmount) {
@@ -38,17 +40,8 @@ export const createTransaction = async (req, res, next) => {
             }
         }
 
-        // Create the transaction
-        const transaction = await new TransactionModel({
-            accountNumber: accountNumberSender,
-            accountId: senderAccount.id,
-            type: typeOfTransaction,
-            description: description,
-            transactionAmount: transactionAmount,
-            receiverAccountNumber: accountNumberReceiver,
-        });
-
         let error = new Error("Transaction type is invalid");
+        let description = `account ${accountNumberSender} Transfered ${transactionAmount} to ${accountNumberReceiver}`;
 
         // Update account balances based on transaction type
         switch (typeOfTransaction) {
@@ -56,7 +49,7 @@ export const createTransaction = async (req, res, next) => {
                 // Deduct from sender
                 senderAccount.balance -= transactionAmount;
                 // Add to recipient
-                TransactionModel.findByIdAndUpdate(
+                AccountModel.findByIdAndUpdate(
                     { id: receiverAccount.id },
                     { balance: receiverAccount.balance += transactionAmount }
                 );
@@ -68,6 +61,7 @@ export const createTransaction = async (req, res, next) => {
                     { accountNumber: accountNumberSender },
                     { balance: senderAccount.balance += transactionAmount }
                 );
+                description = `Deposition of ${transactionAmount} to account ${accountNumberSender}`;
                 break;
 
             case "withdrawal":
@@ -75,43 +69,102 @@ export const createTransaction = async (req, res, next) => {
                     { accountNumber: accountNumberSender },
                     { balance: senderAccount.balance -= transactionAmount }
                 );
+                description = `Withdrawal of ${transactionAmount} from account ${accountNumberSender}`;
                 break;
 
             case "loan":
                 senderAccount.loans.push({
-                    name: extra?.name || "Loan",
-                    principal: transactionAmount,
+                    name: loanPayload?.name || "New Loan",
+                    principal: loanPayload?.description || "New Loan",
                     remainingBalance: transactionAmount,
-                    interestRate: extra?.interestRate || 0,
-                    monthlyPayment: extra?.monthlyPayment || 0,
-                    termMonths: extra?.termMonths || 0,
-                    dueDate: extra?.dueDate || null
+                    interestRate: loanPayload?.interestRate || 0.1,
+                    monthlyPayment: loanPayload?.monthlyPayment || transactionAmount / 12,
+                    termMonths: loanPayload?.termMonths || 12,
+                    dueDate: loanPayload?.dueDate || new Date(new Date().setMonth(new Date().getMonth() + 12))
                 });
-                account.balance += transactionAmount;
+                senderAccount.balance += transactionAmount;
+                description = `${accountNumberSender} asks for a loan of ${transactionAmount} for ${loanPayload?.monthlyPayment} months`;
                 break;
 
             case "saving":
+                const startDate = new Date();
+                const maturityDate = savingPayload?.maturityDate || new Date(new Date().setMonth(startDate.getMonth() + 12));
+                const durationInMonths = (maturityDate.getFullYear() - startDate.getFullYear()) * 12
+                    + (maturityDate.getMonth() - startDate.getMonth());
+
                 senderAccount.savingsPlans.push({
-                    name: extra?.name || "Saving",
+                    name: savingPayload?.name || "Saving",
                     balance: transactionAmount,
-                    targetAmount: extra?.targetAmount || transactionAmount,
-                    interestRate: extra?.interestRate || 0,
-                    startDate: new Date(),
-                    maturityDate: extra?.maturityDate || null,
-                    isLocked: extra?.isLocked || false
+                    targetAmount: savingPayload?.targetAmount,
+                    interestRate: savingPayload?.interestRate || 0.03,
+                    startDate,
+                    maturityDate,
+                    isLocked: durationInMonths < 6 ? true : (savingPayload?.isLocked || false)
                 });
                 senderAccount.balance -= transactionAmount;
+
+                description = `${accountNumberSender} opens a saving plan of ${savingPayload?.targetAmount} for ${maturityDate} months`;
                 break;
 
             case "currencyExchange":
-                let cost = extra?.currencyPrice * extra?.amountBought;
-                if(account.balance >= cost) {
-                    account.subBalances[extra?.currencyName] += extra?.amountBought;
-                    account.balance -= cost;
+                const currencyToBuy = exchangePayload?.currencyToBuy.toUpperCase();
+                const payingCurrency = exchangePayload?.payingCurrency.toUpperCase();
+                const amount = exchangePayload?.amount;
+
+                if (!currencyToBuy || !payingCurrency || !amount) {
+                    error = new Error("Missing required fields in exchangePayload payload");
+                    error.statusCode = 400;
+                    throw error;
                 }
-                error = new Error("Insufficient funds");
-                error.statusCode = 400;
-                throw error;
+
+                const response = await axios.get(
+                    `https://open.er-api.com/v6/latest/${currencyToBuy}`
+                );
+
+                if(response.status === 200) {
+                    const priceOfBuyCurrency = response.data['rates'][payingCurrency];
+                    let cost = priceOfBuyCurrency * amount;
+                    if (senderAccount.balance >= cost) {
+                        await AccountModel.findByIdAndUpdate(
+                            senderAccount.id,
+                            {
+                                $inc: {
+                                    balance: -cost,
+                                    [`subBalances.${currencyToBuy}`]: amount
+                                }
+                            },
+                            { new: true, upsert: true } // upsert ensures the field exists
+                        );
+
+                        const exchangeTransaction = await new TransactionModel({
+                            accountNumber: accountNumberSender,
+                            accountId: senderAccount.id,
+                            type: typeOfTransaction,
+                            description: `Exchange of ${cost} ${payingCurrency} to ${amount} ${currencyToBuy}`,
+                            transactionAmount: cost,
+                        });
+
+                        await exchangeTransaction.save();
+                        await senderAccount.save();
+
+                        return res.status(201).send({
+                            success: true,
+                            data: {
+                                Transaction: exchangeTransaction,
+                                senderAccountNumber: accountNumberSender,
+                                subBalances: senderAccount.subBalances
+                            }
+                        });
+                    } else {
+                        error = new Error("Insufficient funds");
+                        error.statusCode = 400;
+                        throw error;
+                    }
+                } else {
+                    error = new Error("Failed to find currencies prices");
+                    error.statusCode = 500;
+                    throw error;
+                }
                 break;
 
             default:
@@ -119,6 +172,16 @@ export const createTransaction = async (req, res, next) => {
                 error.statusCode = 400;
                 throw error;
         }
+
+        // Create the transaction
+        const transaction = await new TransactionModel({
+            accountNumber: accountNumberSender,
+            accountId: senderAccount.id,
+            type: typeOfTransaction,
+            description: description,
+            transactionAmount: transactionAmount,
+            receiverAccountNumber: accountNumberReceiver,
+        });
 
         await transaction.save();
         await senderAccount.save();
@@ -174,12 +237,16 @@ export const getTransactionsByAccount = async (req, res, next) => {
 };
 
 export const deleteTransactions = async (req, res, next) => {
-    await TransactionModel.collection.drop();
+    try {
+        await TransactionModel.collection.drop();
 
-    await TransactionModel.updateMany(
-        { receiverAccountNumber: { $exists: false } },
-        { $set: { receiverAccountNumber: null } }
-    );
+        await TransactionModel.updateMany(
+            {receiverAccountNumber: {$exists: false}},
+            {$set: {receiverAccountNumber: null}}
+        );
 
-    res.status(200).send({ success: true });
+        res.status(200).send({success: true});
+    } catch (error) {
+        next(error);
+    }
 }
