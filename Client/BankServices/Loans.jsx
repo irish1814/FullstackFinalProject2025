@@ -13,14 +13,15 @@ export default function Loans() {
   const FIXED_RATE = 0.5; 
 
   const reload = async () => {
-    try {
-      if (!fromAccount) return;
-      const acc = await AccountsService.getAccount(fromAccount);
-      setLoans(acc.loans || []);
-    } catch (err) {
-      setStatus(err.message || "Failed to load loans");
-    }
-  };
+  try {
+    if (!localStorage.getItem("accountNumber")) return;
+    const loans = await LoansService.list(localStorage.getItem("accountNumber"));
+    setLoans(loans.data.loans || []);
+  } catch (err) {
+    setStatus(err.message || "Failed to load loans.");
+  }
+};
+
 
   useEffect(() => {
     (async () => {

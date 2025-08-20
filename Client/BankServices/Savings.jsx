@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { TransactionsService } from "./service/transactions.service";
-import { AccountsService } from "./service/accounts.service"; // ✅ לוודא שקיים
+import { AccountsService } from "./service/accounts.service"; 
 
 export default function Savings() {
   const [plans, setPlans] = useState([]);
@@ -8,9 +8,8 @@ export default function Savings() {
   const [monthlyAmount, setMonthlyAmount] = useState("");
   const [term, setTerm] = useState("");
   const [status, setStatus] = useState("");
-  const [fromAccount, setFromAccount] = useState(null); // ✅ שמירת מספר החשבון
+  const [fromAccount, setFromAccount] = useState(null); 
 
-  // קביעת ריבית אוטומטית לפי סכום
   const getRateByAmount = (amt) => {
     const a = Number(amt || 0);
     if (a > 20000) return 4;
@@ -18,34 +17,41 @@ export default function Savings() {
     return 3;
   };
 
-  // טעינת כל התכניות הקיימות (מתוך ה־transactions)
   const reload = async () => {
+  try {
+    const allTx = await TransactionsService.list(localStorage.getItem("accountNumber"));
+
+    const txArray = Array.isArray(allTx) ? allTx : allTx.data || [];
+
+    const savings = txArray.filter((tx) => tx.typeOfTransaction === "saving");
+    setPlans(savings);
+  } catch (err) {
+    setStatus(err.message || "Failed to load saving plans.");
+  }
+};
+
+
+useEffect(() => {
+  const loadAccount = async () => {
     try {
-      const allTx = await TransactionsService.list();
-      const savings = allTx.filter((tx) => tx.typeOfTransaction === "saving");
-      setPlans(savings);
+      const accountNumber = localStorage.getItem("accountNumber");
+      const res = await AccountsService.getAccountById(accountNumber);
+
+      if (res && res.data && res.data.account) {
+        setFromAccount(res.data.account.accountNumber);
+      } else {
+        setStatus("No account found.");
+      }
     } catch (err) {
-      setStatus(err.message || "Failed to load saving plans.");
+      setStatus(err.message || "Failed to load account.");
     }
   };
 
-  useEffect(() => {
-    const loadAccount = async () => {
-      try {
-        const accounts = await AccountsService.getAccounts();
-        if (accounts && accounts.length > 0) {
-          setFromAccount(accounts[0].accountNumber); // ✅ נשתמש בחשבון הראשון
-        }
-      } catch {
-        setStatus("Failed to load account.");
-      }
-    };
+  loadAccount();
+  reload();
+}, []);
 
-    loadAccount();
-    reload();
-  }, []);
 
-  // חישוב ערך עתידי
   const futureValue = (p, annualRate, months) => {
     const r = Number(annualRate || 0) / 12 / 100;
     const n = Number(months || 0);
@@ -64,7 +70,7 @@ export default function Savings() {
     const months = Number(term);
     const autoRate = getRateByAmount(monthly);
 
-    if (!name || !monthly || !months || !fromAccount) {
+    if (!name || !monthly || !months || !localStorage.getItem("accountNumber")){
       setStatus("Please fill all fields.");
       return;
     }
@@ -72,7 +78,7 @@ export default function Savings() {
     try {
       await TransactionsService.create({
         typeOfTransaction: "saving",
-        accountNumberSender: fromAccount, // ✅ עכשיו מוגדר
+        accountNumberSender: localStorage.getItem("accountNumber"),
         transactionAmount: monthly,
         savingPayload: {
           name,
@@ -138,7 +144,6 @@ export default function Savings() {
           </div>
         </section>
 
-        {/* פתיחת תכנית חדשה */}
         <section className="grid cols-2 gap-2 mt-2">
           <form className="form form--card" onSubmit={onOpen}>
             <h3>Open new plan</h3>

@@ -1,95 +1,113 @@
 import React, { useEffect, useState } from "react";
-import { AccountsService } from "./service/accounts.service"
-import '../css/index.css';
+import { TransactionsService } from "./service/transactions.service";
+import '../css/index.css'
 
 export default function Transfers() {
-  const [accounts, setAccounts] = useState([]);
-  const [fromId, setFromId] = useState("");
-  const [toAccountNumber, setToAccountNumber] = useState("");
+  const [transactions, setTransactions] = useState([]);
   const [amount, setAmount] = useState("");
-  const [note, setNote] = useState("");
+  const [receiver, setReceiver] = useState("");
   const [status, setStatus] = useState("");
 
+  const accountNumber = localStorage.getItem("accountNumber");
+
   useEffect(() => {
-    (async () => {
-      const accs = await AccountsService.getAccounts();
-      setAccounts(accs);
-      if (accs[0]) setFromId(accs[0].accountNumber);
-    })();
-  }, []);
+    const load = async () => {
+      try {
+        const res = await TransactionsService.list(accountNumber);
+        setTransactions(res.data || []);
+      } catch (err) {
+        setStatus("❌ Failed to load transactions");
+      }
+    };
+    load();
+  }, [accountNumber]);
 
-  const onSubmit = async (e) => {
-  e.preventDefault();
-  setStatus("");
-  const val = Number(amount);
-  if (!fromId || !toAccountNumber || !val || val <= 0) {
-    setStatus("Please fill all fields correctly.");
-    return;
-  }
+  const onTransfer = async (e) => {
+    e.preventDefault();
+    try {
+      await TransactionsService.create({
+        accountNumberSender: accountNumber,
+        accountNumberReceiver: receiver,
+        transactionAmount: Number(amount),
+        typeOfTransaction: "transfer",
+        description: "User transfer",
+      });
+      setStatus("✅ Transfer successful");
+      setAmount("");
+      setReceiver("");
 
-  try {
-    await TransactionsService.create({
-      accountNumberSender: fromId,           
-      accountNumberReceiver: toAccountNumber,
-      typeOfTransaction: "transfer",         
-      description: note || "Manual transfer",
-      transactionAmount: val
-    });
-
-    setStatus("Transfer recorded successfully.");
-    setAmount("");
-    setNote("");
-    setToAccountNumber("");
-  } catch (e) {
-    setStatus(e.message || "Transfer failed");
-  }
-};
-
-
-  if (!accounts.length) return <div>Loading accounts...</div>;
+      const res = await TransactionsService.list(accountNumber);
+      setTransactions(res.data || []);
+    } catch (err) {
+      setStatus(err.message || "❌ Transfer failed");
+    }
+  };
 
   return (
-  <div className="content">
-    <div className="container">
-      <h1>Transfers</h1>
+    <div className="content">
+      <div className="toolbar">
+        <h1>Transfers</h1>
+      </div>
 
-      <form className="form form--card mt-2" onSubmit={onSubmit}>
-        <div className="form__row">
-          <label className="form__label">From account</label>
-          <select className="select" value={fromId} onChange={(e) => setFromId(e.target.value)}>
-              {accounts.map((a) => (
-                <option key={a.accountNumber} value={a.accountNumber}>
-                  {a.accountNumber}
-                </option>
+      {/* כרטיס לטופס */}
+      <div className="card card--em" style={{ marginBottom: "24px" }}>
+        <form className="list" onSubmit={onTransfer}>
+          <input
+            className="input"
+            type="text"
+            placeholder="Receiver account number"
+            value={receiver}
+            onChange={(e) => setReceiver(e.target.value)}
+          />
+          <input
+            className="input"
+            type="number"
+            placeholder="Amount"
+            value={amount}
+            onChange={(e) => setAmount(e.target.value)}
+          />
+          <button className="btn btn--primary" type="submit">
+            Transfer
+          </button>
+        </form>
+        {status && <p className="badge badge--ok" style={{ marginTop: "12px" }}>{status}</p>}
+      </div>
+
+      {/* כרטיס לטבלה */}
+      <div className="card">
+        <div className="toolbar">
+          <h2>My Transactions</h2>
+        </div>
+
+        {transactions.length === 0 ? (
+          <p className="badge badge--warn">No transactions yet.</p>
+        ) : (
+          <table className="table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Receiver</th>
+                <th>Amount</th>
+                <th>Type</th>
+              </tr>
+            </thead>
+            <tbody>
+              {transactions.map((t) => (
+                <tr key={t._id}>
+                  <td>{new Date(t.createdAt).toLocaleString()}</td>
+                  <td>{t.accountNumberReceiver}</td>
+                  <td>{t.transactionAmount}</td>
+                  <td>
+                    <span className="badge">
+                      {t.typeOfTransaction}
+                    </span>
+                  </td>
+                </tr>
               ))}
-            </select>
-
-        </div>
-
-        <div className="form__row">
-          <label className="form__label">To account number</label>
-          <input className="input" value={toAccountNumber} onChange={(e) => setToAccountNumber(e.target.value)} />
-        </div>
-
-        <div className="form__row">
-          <label className="form__label">Amount</label>
-          <input className="input" type="number" value={amount} onChange={(e) => setAmount(e.target.value)} />
-        </div>
-
-        <div className="form__row">
-          <label className="form__label">Note</label>
-          <input className="input" value={note} onChange={(e) => setNote(e.target.value)} />
-        </div>
-
-        <div className="form__actions">
-          <button className="btn" type="button">Cancel</button>
-          <button className="btn btn--primary" type="submit">Send</button>
-        </div>
-
-        {status && <p className="form__hint mt-1">{status}</p>}
-      </form>
+            </tbody>
+          </table>
+        )}
+      </div>
     </div>
-  </div>
-);
-
+  );
 }

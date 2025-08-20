@@ -1,9 +1,9 @@
 import { http } from "../http.jsx";
 
 export const SavingsService = {
-  list: () => http("/transactions"),
+  list: () => http("/api/transactions"),  
   create: ({ accountNumberSender, amount, targetAmount, interestRate, termMonths }) =>
-    http("/transactions", {
+    http("/api/transactions", {          
       method: "POST",
       data: {
         accountNumberSender,

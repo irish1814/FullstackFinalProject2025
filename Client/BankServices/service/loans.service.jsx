@@ -1,7 +1,7 @@
 import { http } from "../http.jsx";
 
 export const LoansService = {
-  list: () => http("/transactions/loans"),
+  list: (accountNumber) => http(`/loans/${accountNumber}`),
 
   request: ({ accountNumberSender, transactionAmount, termMonths, annualRate }) =>
     http("/transactions/create", {

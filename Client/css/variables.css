@@ -97,3 +97,20 @@
 @media (min-width: 769px){
   .drawer { display: none; }
 }
+.cash-actions {
+  display: flex;
+  gap: 20px;         
+  align-items: flex-start;
+  margin-top: 20px;
+}
+
+.cash-card {
+  flex: 1;           
+  min-width: 280px; 
+}
+
+@media (max-width: 768px) {
+  .cash-actions {
+    flex-direction: column;
+  }
+}

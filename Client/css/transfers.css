@@ -1,0 +1,89 @@
+.transfers-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: Arial, sans-serif;
+}
+
+.transfers-container h1 {
+  text-align: center;
+  margin-bottom: 25px;
+  font-size: 28px;
+  color: #2c3e50;
+}
+
+.transfer-form {
+  background: #fff;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.transfer-form input {
+  flex: 1;
+  min-width: 200px;
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+}
+
+.transfer-form button {
+  background: #244358;
+  color: rgb(34, 84, 93);
+  border: none;
+  padding: 12px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.transfer-form button:hover {
+  background: #2980b9;
+}
+
+.transfer-status {
+  margin: 15px 0;
+  text-align: center;
+  font-weight: bold;
+  color: #27ae60;
+}
+
+.transactions-list {
+  margin-top: 30px;
+  background: #fff;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.transactions-list h2 {
+  margin-bottom: 15px;
+  font-size: 22px;
+  color: #2c3e50;
+}
+
+.transactions-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.transactions-table th,
+.transactions-table td {
+  padding: 12px;
+  border-bottom: 1px solid #eee;
+  text-align: left;
+}
+
+.transactions-table th {
+  background: #336f75;
+  font-weight: bold;
+  color: #2c3e50;
+}
+
+.transactions-table tr:hover {
+  background: #358289;
+}

@@ -81,13 +81,13 @@ export const createTransaction = async (req, res, next) => {
             case "loan":
                 senderAccount.loans.push({
                     name: loanPayload?.name || "New Loan",
-                    remainingBalance: transactionAmount,
+                    remainingBalance: Number(transactionAmount),
                     interestRate: loanPayload?.interestRate || 0.1,
                     monthlyPayment: loanPayload?.monthlyPayment || transactionAmount / 12,
                     termMonths: loanPayload?.termMonths || 12,
                     dueDate: loanPayload?.dueDate || new Date(new Date().setMonth(new Date().getMonth() + 12))
                 });
-                senderAccount.balance += transactionAmount;
+                senderAccount.balance += Number(transactionAmount);
                 description = `${accountNumberSender} asks for a loan of ${transactionAmount} for ${loanPayload?.termMonths} months`;
                 break;
 

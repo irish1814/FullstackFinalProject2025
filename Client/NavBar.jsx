@@ -46,6 +46,7 @@ export default function NavBar() {
           <NavLink to="/dashboard" end>Dashboard</NavLink>
           {role === "admin" && <NavLink to="/accounts">Accounts</NavLink>}
           <NavLink to="/transfers">Transfers</NavLink>
+          <NavLink to="/cash">Cash</NavLink>
           <NavLink to="/loans">Loans</NavLink>
           <NavLink to="/savings">Savings</NavLink>
           <NavLink to="/exchange">Exchange</NavLink>
@@ -84,6 +85,7 @@ export default function NavBar() {
         <NavLink to="/dashboard" onClick={() => setOpen(false)}>Dashboard</NavLink>
         <NavLink to="/accounts" onClick={() => setOpen(false)}>Accounts</NavLink>
         <NavLink to="/transfers" onClick={() => setOpen(false)}>Transfers</NavLink>
+        <NavLink to="/cash" onClick={() => setOpen(false)}>Cash</NavLink>
         <NavLink to="/loans" onClick={() => setOpen(false)}>Loans</NavLink>
         <NavLink to="/savings" onClick={() => setOpen(false)}>Savings</NavLink>
         <NavLink to="/exchange" onClick={() => setOpen(false)}>Exchange</NavLink>

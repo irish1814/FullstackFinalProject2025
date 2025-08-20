@@ -12,6 +12,7 @@ import ProfileDetails from "./login&signup/ProfileDetails.jsx";
 import NavBar from "./NavBar"; 
 import Profile from "./login&signup/Profile.jsx";
 import AdminPage from "../Client/src/Admin";
+import CashActions from "./BankServices/CashActions.jsx";   // ייבוא
 
 
 function isAuthed() {
@@ -65,6 +66,10 @@ export default function AppRouter() {
           <Route
             path="/transfers"
             element={<RequireAuth><Transfers /></RequireAuth>}
+          />
+          <Route
+            path="/cash"
+            element={<RequireAuth><CashActions /></RequireAuth>}
           />
           <Route
             path="/loans"

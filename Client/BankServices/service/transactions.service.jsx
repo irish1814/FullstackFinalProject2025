@@ -1,12 +1,18 @@
-import { http } from "../http.jsx";
+import { http } from "../http.jsx"; 
 
 export const TransactionsService = {
-  async create(payload) {
-    const res = await http("/transactions/create", { method: "POST", data: payload });
-    return res?.data ?? null;
+  async list(accountNumber) {
+    const res = await http(`/transactions/account/${accountNumber}`, {
+      token: localStorage.getItem("token"),
+    });
+    return res.data || res || [];
   },
-  async list() {
-    const res = await http("/transactions", { method: "GET" });
-    return res?.data ?? [];
-  }
+
+  async create(data) {
+    return http("/transactions/create", {
+      method: "POST",
+      data,
+      token: localStorage.getItem("token"),
+    });
+  },
 };

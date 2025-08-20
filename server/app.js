@@ -10,6 +10,8 @@ import loansRoutes from "./routes/loan.routes.js";
 import savingsRoutes from "./routes/saving.routes.js";
 import contactRoutes from "./routes/contact.routes.js";
 import exchangeRoutes from "./routes/currencyExchange.routes.js";
+import checkRoutes from "./routes/check.routes.js";
+
 import { PORT } from "./config/env.js";
 import 'dotenv/config';
 
@@ -39,6 +41,7 @@ app.use('/api/savings', savingsRoutes);
 app.use('/api/loans', loansRoutes);
 app.use('/api/contacts', contactRoutes);
 app.use('/api/exchanges', exchangeRoutes);
+app.use("/api", checkRoutes);
 
 app.use(errorMiddleware);
 
