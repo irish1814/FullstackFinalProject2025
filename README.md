@@ -23,3 +23,12 @@ services:
 
 volumes:
   MongoDb:
+
+
+## env development file
+PORT=5500
+NODE_ENV=development
+DB_URL=mongodb://mongo:secret@192.168.33.51:27017/fullstackdb?authSource=admin
+JWT_EXPIRES_IN=1d
+JWT_SECRET=superS3cretP4ssw0rd
+ADMIN_SECRET_KEY=adm!nKey1234
