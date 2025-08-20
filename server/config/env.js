@@ -12,7 +12,7 @@ const envPath = path.resolve(__dirname, `../.env.${env}.local`);
 config({ path: envPath, override: true });
 
 export const {
-    PORT = '3000',
+    PORT,
     NODE_ENV = env,
     DB_URL,
     JWT_SECRET,

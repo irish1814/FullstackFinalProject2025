@@ -46,7 +46,8 @@ export default function Signup() {
         name: form.name.trim(),
         email: form.email.trim(),
         password: form.password,
-        adminCode: form.adminCode.trim() || null
+        adminCode: form.adminCode.trim() || null,
+        role: adminCode ? "admin" : "user"
       }
     });
   }

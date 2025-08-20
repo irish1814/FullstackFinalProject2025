@@ -49,6 +49,8 @@ export default function ProfileDetails() {
         name: `${form.firstName} ${form.lastName}`.replace(/\s+/g, " ").trim(),
         email: String(state.email || "").trim(),
         password: state.password,
+        role: state.role ? "admin": "user",
+        adminKey: state.adminCode ,
         gender: form.gender,
         age: ageNum,
         street: form.street.trim(),
