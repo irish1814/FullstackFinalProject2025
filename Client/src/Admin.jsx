@@ -37,7 +37,8 @@ export default function AdminPage() {
       try {
         setLoading(true);
         const data = await api("/users/all"); // :contentReference[oaicite:4]{index=4}
-        if (alive) setUsers(data);
+        console.log(data)
+        if (alive) setUsers(data.data.users);
       } catch (e) {
         alert("Failed to load users: " + e.message);
       } finally {

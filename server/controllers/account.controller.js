@@ -15,7 +15,6 @@ export const getAccounts = async (req, res, next) => {
 export const getAccountByAccountNumber = async (req, res, next) => {
     try {
         const { id } = req.params;
-
         const account = await AccountModel.findOne({ accountNumber: id });
 
         if (!account) {

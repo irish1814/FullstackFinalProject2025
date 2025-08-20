@@ -105,11 +105,6 @@ export default function Login() {
               {loading ? "Logging in..." : "Log in"}
             </button>
 
-            <button type="button" className="btn"
-                    onClick={() => setAdmin({ open: true, code: "", err: "", busy: false })}>
-              Admin entry
-            </button>
-
             <span className="form__hint">
               No account? <Link to="/signup">Create one</Link>
             </span>
