@@ -41,8 +41,8 @@ app.use('/api/savings', savingsRoutes);
 app.use('/api/loans', loansRoutes);
 app.use('/api/contacts', contactRoutes);
 app.use('/api/exchanges', exchangeRoutes);
-app.use("/api", checkRoutes);
-
+app.use("/api/cash", checkRoutes);  
+app.use("/api/check", checkRoutes);
 app.use(errorMiddleware);
 
 app.listen(PORT, async () => {

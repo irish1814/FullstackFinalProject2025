@@ -1,19 +1,13 @@
 import { Router } from "express";
+import { authenticateJWT } from "../middleware/authenticate.middleware.js";
+import { cashDeposit, cashWithdraw, checkDeposit } from "../controllers/check.controller.js";
 import multer from "multer";
 
-const upload = multer({ dest: "uploads/checks/" });
-const checkRoutes = Router();
+const upload = multer({ dest: "uploads/" });
+const router = Router();
 
-checkRoutes.post("/check-deposit", upload.single("checkImage"), (req, res) => {
-  if (!req.file) {
-    return res.status(400).json({ success: false, error: "No file uploaded" });
-  }
+router.post("/deposit", authenticateJWT, cashDeposit);
+router.post("/withdraw", authenticateJWT, cashWithdraw);
+router.post("/deposit-check", authenticateJWT, upload.single("checkImage"), checkDeposit);
 
-  res.json({
-    success: true,
-    filename: req.file.filename,
-    originalName: req.file.originalname,
-  });
-});
-
-export default checkRoutes;
+export default router;
