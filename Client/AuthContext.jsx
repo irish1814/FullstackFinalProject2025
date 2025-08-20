@@ -24,7 +24,6 @@ export function AuthProvider({ children }) {
 
   const login = async (email, password) => {
     const res = await AuthService.login(email, password);
-    // מצפה: res = { token, user }
     if (res?.token) {
       setToken(res.token);
       localStorage.setItem("token", res.token);
@@ -51,6 +50,6 @@ export const useAuth = () => useContext(AuthCtx);
 export function Protected({ children }) {
   const { token, loading } = useAuth();
   if (loading) return <div>Loading...</div>;
-  if (!token)   return <div>Must login.</div>; // אפשר להחליף ל-<Navigate /> אם יש Router
+  if (!token)   return <div>Must login.</div>;
   return children;
 }

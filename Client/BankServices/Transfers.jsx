@@ -49,7 +49,6 @@ export default function Transfers() {
         <h1>Transfers</h1>
       </div>
 
-      {/* כרטיס לטופס */}
       <div className="card card--em" style={{ marginBottom: "24px" }}>
         <form className="list" onSubmit={onTransfer}>
           <input
@@ -73,7 +72,6 @@ export default function Transfers() {
         {status && <p className="badge badge--ok" style={{ marginTop: "12px" }}>{status}</p>}
       </div>
 
-      {/* כרטיס לטבלה */}
       <div className="card">
         <div className="toolbar">
           <h2>My Transactions</h2>

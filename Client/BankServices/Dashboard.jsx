@@ -68,7 +68,6 @@ export default function Dashboard() {
           <h1>Dashboard</h1>
         </div>
 
-        {/* חשבון אישי */}
         <section className="kpis">
           {primaryAccount ? (
             <>
@@ -88,7 +87,6 @@ export default function Dashboard() {
           )}
         </section>
 
-        {/* פרטי החשבון */}
         {primaryAccount && (
           <div className="card card--em mt-2">
             <h3>Account Summary</h3>
@@ -104,7 +102,6 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* תנועות אחרונות */}
         <div className="card card--tilt mt-2">
           <h3>Recent Transactions</h3>
           {recentTx.length === 0 ? (
