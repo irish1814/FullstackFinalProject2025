@@ -49,6 +49,8 @@ export default function Login() {
         const { token, user , account} = res;
         if (!token) throw new Error("חסרים נתוני התחברות");
         localStorage.setItem("token", token);
+        console.log(user);
+        if(user?._id) localStorage.setItem("userId", user._id);
         if (user?.email) localStorage.setItem("email", user.email);
         if (user?.role) localStorage.setItem("role", user.role);
         if (account?.accountNumber) localStorage.setItem("accountNumber", account.accountNumber);

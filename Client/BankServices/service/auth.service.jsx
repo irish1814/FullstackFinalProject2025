@@ -28,12 +28,16 @@ export const AuthService = {
     return res?.data ?? null;  
   },
 
-  async toggle2FA(userId) {
-    const res = await http("/auth/toggle-2fa", {
-      method: "POST",
-      data: { id: userId }
+  async toggle2FA(id, disable=false) {
+    const res = await http("/auth/toggleMFA", { 
+      method: "POST", 
+      data: { 
+        id: id,
+        disable: disable
+      },
+      token: localStorage.getItem("token"),
     });
-    return res?.data ?? null;
+    return res?.data ?? null;  
   },
 
   async getProfile() {

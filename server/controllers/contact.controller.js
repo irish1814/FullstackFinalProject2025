@@ -32,7 +32,7 @@ export const getMessageById = async (req, res, next) => {
 export const createMessage = async (req, res, next) => {
     try {
         const { id, problemDescription } = req.body;
-        const account = await AccountModel.findOne( { userId: id });
+        const account = await AccountModel.findOne( { accountNumber: id });
 
         if(!account){
             const error = new Error("Account Not Found");

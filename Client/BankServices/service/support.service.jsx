@@ -1,11 +1,11 @@
 import { http } from "../http.jsx";
 
 export const SupportService = {
-  async sendMessage(type, subject, message, contact) { 
+  async sendMessage(id, problemDescription) { 
     http("/contact/create", {
       method: "POST",
       token: localStorage.getItem("token"),
-      data: { type, subject, message, contact }
+      data: { id, problemDescription }
     });
   },
 

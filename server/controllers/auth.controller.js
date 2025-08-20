@@ -192,6 +192,9 @@ export const toggleMFA = async (req, res, next) => {
     try {
         const { id, disable } = req.body;
 
+        console.log(req.params);
+        console.log(req.body);
+
         const user = await UserModel.findById(id);
         if (!user) {
             const err = new Error('User not found');
@@ -222,7 +225,6 @@ export const toggleMFA = async (req, res, next) => {
             { new: true }
         );
 
-        // Optional: generate QR code for app scanning
         const oauth_url = secret.otpauth_url;
         const qrCodeDataURL = await qrcode.toDataURL(oauth_url);
 
