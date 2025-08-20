@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { AuthService } from "../BankServices/service/auth.service.jsx";
 import "../css/index.css";
@@ -21,6 +21,13 @@ export default function Login() {
     verifying: false,
     error: ""
   });
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      nav("/dashboard");
+    }
+  }, [nav]);
 
   function onChange(e) { setForm({ ...form, [e.target.name]: e.target.value }); }
 

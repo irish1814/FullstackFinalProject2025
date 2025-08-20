@@ -1,35 +1,17 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Navigate } from "react-router-dom";
 import "../css/index.css";
-
-async function api(path, opts = {}) {
-  const API_URL = import.meta.env.VITE_API_URL || "/api";
-  const token = localStorage.getItem("token");
-  const headers = {
-    "Content-Type": "application/json",
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    ...(opts.headers || {})
-  };
-  const res = await fetch(`${API_URL}${path}`, { ...opts, headers });
-  if (!res.ok) {
-    const msg = await res.text().catch(() => res.statusText);
-    throw new Error(msg || "Request failed");
-  }
-  return res.status === 204 ? null : res.json();
-}
+import { AccountsService } from "./service/accounts.service";
+import { UsersService } from "./service/users.service"; // <-- new
 
 export default function Accounts() {
   const role = localStorage.getItem("role");
-  if (role !== "admin") {
-    return <Navigate to="/dashboard" replace />;
-  }
+  if (role !== "admin") return <Navigate to="/dashboard" replace />;
 
   const [users, setUsers] = useState([]);
   const [accounts, setAccounts] = useState([]);
-
   const [qUser, setQUser] = useState("");
   const [qAcc, setQAcc] = useState("");
-
   const [loadingUsers, setLoadingUsers] = useState(true);
   const [loadingAccs, setLoadingAccs] = useState(true);
   const [err, setErr] = useState("");
@@ -37,29 +19,32 @@ export default function Accounts() {
   useEffect(() => {
     let alive = true;
 
-    (async () => {
+    const fetchUsers = async () => {
       try {
         setLoadingUsers(true);
-        const data = await api("/users");
-        if (alive) setUsers(data);
+        const data = await UsersService.getUsers();
+        if (alive) setUsers(data.data.users || []);
       } catch (e) {
-        setErr(e.message || "Failed to load users");
+        setErr(prev => prev || e.message || "Failed to load users");
       } finally {
         if (alive) setLoadingUsers(false);
       }
-    })();
+    };
 
-    (async () => {
+    const fetchAccounts = async () => {
       try {
         setLoadingAccs(true);
-        const data = await api("/accounts");
-        if (alive) setAccounts(data);
+        const data = await AccountsService.getAccounts();
+        if (alive) setAccounts(data.data || []);
       } catch (e) {
         setErr(prev => prev || e.message || "Failed to load accounts");
       } finally {
         if (alive) setLoadingAccs(false);
       }
-    })();
+    };
+
+    fetchUsers();
+    fetchAccounts();
 
     return () => { alive = false; };
   }, []);
@@ -90,7 +75,7 @@ export default function Accounts() {
   async function deleteUser(userId) {
     if (!confirm("Delete this user and all their accounts?")) return;
     try {
-      await api(`/users/${userId}`, { method: "DELETE" });
+      await UsersService.deleteUser(userId);
       setUsers(prev => prev.filter(u => u._id !== userId));
       setAccounts(prev => prev.filter(a => a.userId !== userId));
     } catch (e) {
@@ -101,7 +86,7 @@ export default function Accounts() {
   async function deleteAccount(accId) {
     if (!confirm("Delete this account permanently?")) return;
     try {
-      await api(`/accounts/${accId}`, { method: "DELETE" });
+      await AccountsService.deleteAccount(accId);
       setAccounts(prev => prev.filter(a => (a._id || a.id) !== accId));
     } catch (e) {
       alert("Delete account failed: " + e.message);
@@ -110,14 +95,9 @@ export default function Accounts() {
 
   async function setAccountStatus(accId, status) {
     try {
-      await api(`/accounts/${accId}`, {
-        method: "PATCH",
-        body: JSON.stringify({ status }) 
-      });
+      await AccountsService.setStatus(accId, status);
       setAccounts(prev =>
-        prev.map(a =>
-          (a._id || a.id) === accId ? { ...a, status } : a
-        )
+        prev.map(a => (a._id || a.id) === accId ? { ...a, status } : a)
       );
     } catch (e) {
       alert(`Set status failed: ${e.message}`);
@@ -156,6 +136,7 @@ export default function Accounts() {
       <div className="container">
         <h1>Admin • Accounts & Users</h1>
 
+        {/* Users table */}
         <div className="toolbar mt-2">
           <h2>Users</h2>
           <input
@@ -166,7 +147,6 @@ export default function Accounts() {
             style={{ width: 260 }}
           />
         </div>
-
         <div className="card card--tilt mt-1">
           {loadingUsers ? (
             <div className="skeleton" style={{ height: 12 }} />
@@ -198,6 +178,7 @@ export default function Accounts() {
           )}
         </div>
 
+        {/* Accounts table */}
         <div className="toolbar mt-3">
           <h2>Accounts</h2>
           <input
@@ -208,7 +189,6 @@ export default function Accounts() {
             style={{ width: 360 }}
           />
         </div>
-
         <div className="card card--tilt mt-1">
           {loadingAccs ? (
             <div className="skeleton" style={{ height: 12 }} />
@@ -219,13 +199,7 @@ export default function Accounts() {
               <table className="table">
                 <thead>
                   <tr>
-                    <th>#</th>
-                    <th>Type</th>
-                    <th>Balance</th>
-                    <th>Currency</th>
-                    <th>Status</th>
-                    <th>User</th>
-                    <th style={{width:1}}>Actions</th>
+                    <th>#</th><th>Type</th><th>Balance</th><th>Currency</th><th>Status</th><th>User</th><th style={{width:1}}>Actions</th>
                   </tr>
                 </thead>
                 <tbody>

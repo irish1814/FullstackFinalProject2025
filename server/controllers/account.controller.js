@@ -16,7 +16,6 @@ export const getAccountByAccountNumber = async (req, res, next) => {
     try {
         const { id } = req.params;
         const account = await AccountModel.findOne({ accountNumber: id });
-
         if (!account) {
             const error = new Error("Account not found for this user");
             error.statusCode = 404;
@@ -37,21 +36,33 @@ export const toggleAccount = async (req, res, next) => {
         const accountNumber = req.params.id;
         const newStatus = req.body.status;
 
-        await AccountModel.findByIdAndUpdate(
-            { accountNumber: accountNumber },
+        if (!["active", "frozen", "closed"].includes(newStatus)) {
+            const error = new Error("Invalid status");
+            error.statusCode = 400;
+            throw error;
+        }
+
+        const updatedAccount = await AccountModel.findOneAndUpdate(
+            { accountNumber },
             { status: newStatus },
+            { new: true } // return updated doc
         );
 
-        AccountModel.save();
+        if (!updatedAccount) {
+            const error = new Error("Account not found");
+            error.statusCode = 404;
+            throw error;
+        }
 
         res.status(200).send({
             success: true,
-            data: { accountStatus: newStatus }
-        })
+            data: { accountStatus: updatedAccount.status }
+        });
     } catch (error) {
         next(error);
     }
-}
+};
+
 
 export const updateAccount = async (req, res, next) => {
     try {

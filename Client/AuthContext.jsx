@@ -8,20 +8,6 @@ export function AuthProvider({ children }) {
   const [user, setUser]   = useState(null);
   const [loading, setLoading] = useState(!!token);
 
-  useEffect(() => {
-    (async () => {
-      if (!token) return;
-      try {
-        const me = await AuthService.me(token);
-        setUser(me);
-      } catch (_) {
-        setToken(""); localStorage.removeItem("token");
-      } finally {
-        setLoading(false);
-      }
-    })();
-  }, [token]);
-
   const login = async (email, password) => {
     const res = await AuthService.login(email, password);
     if (res?.token) {

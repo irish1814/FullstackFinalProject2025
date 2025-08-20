@@ -1,4 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
+import { AccountsService } from '../BankServices/service/accounts.service.jsx'
+import { TransactionsService } from '../BankServices/service/transactions.service.jsx'
+
 import "../css/index.css";
 
 async function api(path, opts = {}) {
@@ -30,12 +33,13 @@ export default function Dashboard() {
         setLoading(true);
 
         const accountNumber = localStorage.getItem("accountNumber");
-        const accRes = await api(`/accounts/${accountNumber}`);
-        const txRes = await api(`/transactions/account/${accountNumber}`);
+        const accRes = await AccountsService.getAccountById(accountNumber);
+        const txRes = await TransactionsService.list(accountNumber);
+
 
         if (!alive) return;
         setAccounts(accRes?.data?.account ? [accRes.data.account] : []);
-        setTransactions(txRes?.data?.transactions ?? []);
+        setTransactions(txRes?.data?.transactions ?? []); 
       } catch (e) {
         if (!alive) return;
         setErr(e.message || "Failed to load dashboard data");
