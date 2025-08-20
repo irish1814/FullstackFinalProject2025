@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import { AccountsService } from "../BankServices/service/accounts.service.jsx";
 import { UsersService } from "../BankServices/service/users.service.jsx";
-import { MessagesService } from "../BankServices/service/messages.service.jsx"; // import messages service
+import { SupportService } from "../BankServices/service/support.service.jsx";
 
 function AdminRoute({ children }) {
   const token = localStorage.getItem("token");
@@ -51,7 +51,7 @@ export default function AdminPage() {
     (async () => {
       try {
         setLoadingMessages(true);
-        const res = await MessagesService.getMessages(); // fetch all messages
+        const res = await SupportService.getMessages(); // fetch all messages
         if (alive) setMessages(res.data.messages || []);
       } catch (e) {
         alert("Failed to load messages: " + e.message);
