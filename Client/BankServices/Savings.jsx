@@ -1,29 +1,25 @@
 import React, { useEffect, useState } from "react";
-import { TransactionsService } from "./service/transactions.service";
-import { AccountsService } from "./service/accounts.service"; 
+import { AccountsService } from "./service/accounts.service";
 import { SavingsService } from "./service/savings.service";
-
 
 export default function Savings() {
   const [plans, setPlans] = useState([]);
   const [name, setName] = useState("");
-  const [monthlyAmount, setMonthlyAmount] = useState("");
+  const [amount, setAmount] = useState("");
   const [term, setTerm] = useState("");
   const [status, setStatus] = useState("");
-  const [fromAccount, setFromAccount] = useState(null); 
 
-  const getRateByAmount = (amt) => {
-    const a = Number(amt || 0);
-    if (a > 20000) return 4;
-    if (a >= 10000) return 3.4;
-    return 3;
-  };
-
- const reload = async () => {
+  const reload = async () => {
   try {
     const accountNumber = localStorage.getItem("accountNumber");
-    const res = await SavingsService.list(accountNumber);
-    setPlans(res.data.savings || []);
+    if (!accountNumber) return;
+
+    const res = await AccountsService.getAccountById(accountNumber);
+    if (res && res.data && res.data.account) {
+      setPlans(res.data.account.savingsPlans || []);
+    } else {
+      setPlans([]);
+    }
   } catch (err) {
     setStatus(err.message || "Failed to load saving plans.");
   }
@@ -31,67 +27,44 @@ export default function Savings() {
 
 
 
-
-
-useEffect(() => {
-  const loadAccount = async () => {
-    try {
+  useEffect(() => {
+    (async () => {
       const accountNumber = localStorage.getItem("accountNumber");
+      if (!accountNumber) return;
       const res = await AccountsService.getAccountById(accountNumber);
-
       if (res && res.data && res.data.account) {
-        setFromAccount(res.data.account.accountNumber);
-      } else {
-        setStatus("No account found.");
+        reload();
       }
-    } catch (err) {
-      setStatus(err.message || "Failed to load account.");
-    }
-  };
-
-  loadAccount();
-  reload();
-}, []);
-
-
-  const futureValue = (p, annualRate, months) => {
-    const r = Number(annualRate || 0) / 12 / 100;
-    const n = Number(months || 0);
-    const P = Number(p || 0);
-    if (!P || !n) return 0;
-    if (!r) return (P * n).toFixed(2);
-    const fv = P * ((Math.pow(1 + r, n) - 1) / r);
-    return fv.toFixed(2);
-  };
+    })();
+  }, []);
 
   const onOpen = async (e) => {
     e.preventDefault();
     setStatus("");
 
-    const monthly = Number(monthlyAmount);
+    const val = Number(amount);
     const months = Number(term);
-    const autoRate = getRateByAmount(monthly);
 
-    if (!name || !monthly || !months || !localStorage.getItem("accountNumber")){
+    if (!name || !val || !months) {
       setStatus("Please fill all fields.");
       return;
     }
 
+    const maturityDate = new Date();
+    maturityDate.setMonth(maturityDate.getMonth() + months);
+
     try {
-      await TransactionsService.create({
-        typeOfTransaction: "saving",
+      await SavingsService.create({
         accountNumberSender: localStorage.getItem("accountNumber"),
-        transactionAmount: monthly,
-        savingPayload: {
-          name,
-          targetAmount: monthly * months,
-          interestRate: autoRate,
-          termMonths: months,
-        },
+        amount: val,
+        targetAmount: val * months, 
+        interestRate: 0.03,
+        termMonths: months,
+        maturityDate,
       });
 
       setName("");
-      setMonthlyAmount("");
+      setAmount("");
       setTerm("");
       setStatus("Saving plan opened successfully.");
       reload();
@@ -104,47 +77,6 @@ useEffect(() => {
     <div className="content">
       <div className="container">
         <h1>Savings</h1>
-
-        <section className="card">
-          <h3>My plans</h3>
-          <div className="list mt-2">
-            {plans.length === 0 ? (
-              <div>No saving plans yet.</div>
-            ) : (
-              plans.map((p) => {
-                const s = p.savingPayload || {};
-                const planRate =
-                  s.interestRate ?? getRateByAmount(p.transactionAmount);
-                return (
-                  <div className="list-item" key={p._id}>
-                    <div className="flex justify-between items-center">
-                      <strong>{s.name}</strong>
-                      <span
-                        className={`badge ${
-                          p.status === "active" ? "badge--ok" : "badge--warn"
-                        }`}
-                      >
-                        {p.status}
-                      </span>
-                    </div>
-                    <div>Monthly: ₪{p.transactionAmount}</div>
-                    <div>Term: {s.termMonths} months</div>
-                    <div>Annual rate: {planRate}%</div>
-                    <div>
-                      Projected FV (calc): ₪
-                      {futureValue(
-                        p.transactionAmount,
-                        planRate,
-                        s.termMonths
-                      )}
-                    </div>
-                    <div>Balance: ₪{s.balance ?? 0}</div>
-                  </div>
-                );
-              })
-            )}
-          </div>
-        </section>
 
         <section className="grid cols-2 gap-2 mt-2">
           <form className="form form--card" onSubmit={onOpen}>
@@ -161,12 +93,12 @@ useEffect(() => {
             </div>
 
             <div className="form__row">
-              <label className="form__label">Monthly amount</label>
+              <label className="form__label">Amount</label>
               <input
                 className="input"
                 type="number"
-                value={monthlyAmount}
-                onChange={(e) => setMonthlyAmount(e.target.value)}
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
               />
             </div>
 
@@ -180,13 +112,6 @@ useEffect(() => {
               />
             </div>
 
-            <div className="form__row">
-              <label className="form__label">Annual rate</label>
-              <div className="badge">
-                Auto: {getRateByAmount(Number(monthlyAmount))}%
-              </div>
-            </div>
-
             <div className="form__actions">
               <button className="btn btn--primary" type="submit">
                 Open
@@ -196,6 +121,31 @@ useEffect(() => {
         </section>
 
         {status && <p className="form__hint mt-2">{status}</p>}
+
+        <section className="card">
+          <h3>My plans</h3>
+          <div className="list mt-2">
+            {plans.length === 0 ? (
+              <div>No saving plans yet.</div>
+            ) : (
+              plans.map((p, idx) => (
+                <div className="list-item" key={p._id || idx}>
+                  <div className="flex justify-between items-center">
+                    <strong>{p.name}</strong>
+                    <span className={`badge ${p.isLocked ? "badge--warn" : "badge--ok"}`}>
+                      {p.isLocked ? "Locked" : "Open"}
+                    </span>
+                  </div>
+                  <div>Balance: ₪{p.balance}</div>
+                  <div>Target: ₪{p.targetAmount}</div>
+                  <div>Interest rate: {p.interestRate * 100}%</div>
+                  <div>Start date: {new Date(p.startDate).toLocaleDateString()}</div>
+                  <div>Maturity date: {new Date(p.maturityDate).toLocaleDateString()}</div>
+                </div>
+              ))
+            )}
+          </div>
+        </section>
       </div>
     </div>
   );

@@ -1,4 +1,3 @@
-// controllers/check.controller.js
 import AccountModel from "../models/Account.model.js";
 import TransactionModel from "../models/Transaction.model.js";
 
