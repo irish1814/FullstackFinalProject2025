@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { TransactionsService } from "./service/transactions.service";
 import { AccountsService } from "./service/accounts.service"; 
+import { SavingsService } from "./service/savings.service";
+
 
 export default function Savings() {
   const [plans, setPlans] = useState([]);
@@ -17,18 +19,18 @@ export default function Savings() {
     return 3;
   };
 
-  const reload = async () => {
+ const reload = async () => {
   try {
-    const allTx = await TransactionsService.list(localStorage.getItem("accountNumber"));
-
-    const txArray = Array.isArray(allTx) ? allTx : allTx.data || [];
-
-    const savings = txArray.filter((tx) => tx.typeOfTransaction === "saving");
-    setPlans(savings);
+    const accountNumber = localStorage.getItem("accountNumber");
+    const res = await SavingsService.list(accountNumber);
+    setPlans(res.data.savings || []);
   } catch (err) {
     setStatus(err.message || "Failed to load saving plans.");
   }
 };
+
+
+
 
 
 useEffect(() => {

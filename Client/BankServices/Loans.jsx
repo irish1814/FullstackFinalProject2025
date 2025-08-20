@@ -8,52 +8,50 @@ export default function Loans() {
   const [accounts, setAccounts] = useState([]);
   const [fromAccount, setFromAccount] = useState("");
   const [amount, setAmount] = useState("");
-  const [term, setTerm] = useState("");
+  const [term, setTerm] = useState(""); 
   const [status, setStatus] = useState("");
-  const FIXED_RATE = 0.5; 
+  const FIXED_RATE = 0.5;
 
   const reload = async () => {
-  try {
-    if (!localStorage.getItem("accountNumber")) return;
-    const loans = await LoansService.list(localStorage.getItem("accountNumber"));
-    setLoans(loans.data.loans || []);
-  } catch (err) {
-    setStatus(err.message || "Failed to load loans.");
-  }
-};
+    try {
+      const accountNumber = localStorage.getItem("accountNumber");
+      if (!accountNumber) return;
+      const res = await LoansService.list(accountNumber);
+      setLoans(res.data.loans || []);
+    } catch (err) {
+      setStatus(err.message || "Failed to load loans.");
+    }
+  };
 
-
-  useEffect(() => {
-    (async () => {
-      const accs = await AccountsService.getAccounts();
-      setAccounts(accs);
-      if (accs[0]) {
-        setFromAccount(accs[0].accountNumber);
-      }
-    })();
-  }, []);
-
-  useEffect(() => {
-    if (fromAccount) {
+useEffect(() => {
+  (async () => {
+    const accountNumber = localStorage.getItem("accountNumber");
+    if (!accountNumber) return;
+    const res = await AccountsService.getAccountById(accountNumber);
+    if (res && res.data && res.data.account) {
+      setAccounts([res.data.account]); 
+      setFromAccount(res.data.account.accountNumber);
       reload();
     }
-  }, [fromAccount]);
+  })();
+}, []);
+
 
   const onRequest = async (e) => {
     e.preventDefault();
     setStatus("");
     const val = Number(amount);
-    const months = Number(term);
+    const months = Number(term) || 12; 
 
-    if ( !val || val <= 0 || !months || months <= 0) {
-      setStatus("Please enter valid account, amount and term.");
+    if (!val || val <= 0 || !months || months <= 0) {
+      setStatus("Please enter valid amount and term.");
       return;
     }
 
     try {
       await LoansService.request({
         accountNumberSender: localStorage.getItem("accountNumber"),
-        transactionAmount: amount,
+        transactionAmount: val,
         termMonths: months,
         annualRate: FIXED_RATE,
       });
@@ -71,36 +69,7 @@ export default function Loans() {
       <div className="container">
         <h1>Loans</h1>
 
-        <section className="card">
-          <h3>Active / History</h3>
-          <div className="list mt-2">
-            {loans.length === 0 ? (
-              <div>No loans yet.</div>
-            ) : (
-              loans.map((l, idx) => (
-                <div className="list-item" key={l._id || idx}>
-                  <div className="flex justify-between items-center">
-                    <strong>#{l._id || idx}</strong>
-                    <span
-                      className={`badge ${
-                        l.isPaid ? "badge--ok" : "badge--warn"
-                      }`}
-                    >
-                      {l.isPaid ? "closed" : "active"}
-                    </span>
-                  </div>
-                  <div>Principal: {l.principal}</div>
-                  <div>Remaining: {l.remainingBalance}</div>
-                  <div>Term: {l.termMonths} months</div>
-                  <div>Annual rate: {l.interestRate ?? FIXED_RATE}%</div>
-                  <div>Monthly payment: ₪{l.monthlyPayment}</div>
-                  <div>Due date: {new Date(l.dueDate).toLocaleDateString()}</div>
-                </div>
-              ))
-            )}
-          </div>
-        </section>
-
+        {/* טופס בקשת הלוואה */}
         <section className="grid cols-2 gap-2 mt-2">
           <form className="form form--card" onSubmit={onRequest}>
             <h3>Request new loan</h3>
@@ -121,7 +90,7 @@ export default function Loans() {
               <input
                 className="input"
                 type="number"
-                placeholder="Term (months)"
+                placeholder="Default is 12"
                 value={term}
                 onChange={(e) => setTerm(e.target.value)}
               />
@@ -138,16 +107,39 @@ export default function Loans() {
               </button>
             </div>
           </form>
-
-          <form className="form form--card">
-            <h3>Repay loan</h3>
-            <p className="form__hint">
-              Repayment feature not implemented on server yet.
-            </p>
-          </form>
         </section>
 
         {status && <p className="form__hint mt-2">{status}</p>}
+
+        {/* היסטוריית הלוואות */}
+        <section className="card">
+          <h3>Active / History</h3>
+          <div className="list mt-2">
+            {loans.length === 0 ? (
+              <div>No loans yet.</div>
+            ) : (
+              loans.map((l, idx) => (
+                <div className="list-item" key={l._id || idx}>
+                  <div className="flex justify-between items-center">
+                    <strong>{l.name || `Loan #${idx + 1}`}</strong>
+                    <span
+                      className={`badge ${
+                        l.remainingBalance > 0 ? "badge--warn" : "badge--ok"
+                      }`}
+                    >
+                      {l.remainingBalance > 0 ? "active" : "closed"}
+                    </span>
+                  </div>
+                  <div>Remaining balance: ₪{l.remainingBalance}</div>
+                  <div>Term: {l.termMonths} months</div>
+                  <div>Annual rate: {l.interestRate}%</div>
+                  <div>Monthly payment: ₪{l.monthlyPayment}</div>
+                  <div>Due date: {new Date(l.dueDate).toLocaleDateString()}</div>
+                </div>
+              ))
+            )}
+          </div>
+        </section>
       </div>
     </div>
   );

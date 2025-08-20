@@ -1,9 +1,13 @@
 import { http } from "../http.jsx";
 
 export const SavingsService = {
-  list: () => http("/api/transactions"),  
+  list: (accountNumber) =>
+    http(`/savings/${accountNumber}`, {
+      token: localStorage.getItem("token"),
+    }),
+
   create: ({ accountNumberSender, amount, targetAmount, interestRate, termMonths }) =>
-    http("/api/transactions", {          
+    http("/transactions/create", {
       method: "POST",
       data: {
         accountNumberSender,
@@ -15,5 +19,6 @@ export const SavingsService = {
           termMonths,
         },
       },
+      token: localStorage.getItem("token"),
     }),
 };
