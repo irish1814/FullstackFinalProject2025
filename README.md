@@ -1,4 +1,11 @@
 
+# Bank Simulator  
+
+This project simulate the usages and function of any normal bank (transfers, loans, savings plans etc...) 
+using Express framwork as the API server and React as the client.  
+
+
+
 ## Deployment
 
 ### Requirements
@@ -71,3 +78,8 @@ Goto client folder and run
 ```bash
 npm run dev
 ```
+## Authors
+
+- [@irish1814](https://www.github.com/irish1814)
+- [@nachmanokashi](https://www.github.com/nachmanokashi)
+
